@@ -7,7 +7,6 @@ export default ({ config }) => {
     orientation: "portrait",
     userInterfaceStyle: "automatic",
     
-    // IMPORTANTE: Sovrascriviamo le icone per evitare errori di file mancanti
     icon: undefined,
     splash: undefined,
     
@@ -18,7 +17,6 @@ export default ({ config }) => {
     
     android: {
       package: "com.solartech.app",
-      // Rimuoviamo adaptiveIcon per evitare errori
       adaptiveIcon: undefined,
       permissions: [
         "ACCESS_FINE_LOCATION",
@@ -30,12 +28,10 @@ export default ({ config }) => {
     },
     
     web: {
-      // Rimuoviamo favicon
       favicon: undefined,
     },
     
     plugins: [
-      "expo-router",
       "expo-secure-store",
       "expo-location",
       "expo-camera",
