@@ -20,7 +20,9 @@ const createTables = async () => {
         id SERIAL PRIMARY KEY,
         username VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+        name VARCHAR(255),
         email VARCHAR(255),
+        phone VARCHAR(50),
         role VARCHAR(20) NOT NULL CHECK (role IN ('master', 'ditta', 'tecnico')),
         company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,
         created_at TIMESTAMP DEFAULT NOW(),
@@ -72,19 +74,19 @@ const createTables = async () => {
     console.log('Tabelle create con successo!');
 
     const adminExists = await pool.query(
-      "SELECT id FROM users WHERE username = 'admin'"
+      "SELECT id FROM users WHERE username = 'gbd'"
     );
 
     if (adminExists.rows.length === 0) {
       const bcrypt = require('bcryptjs');
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const hashedPassword = await bcrypt.hash('password', 10);
       
       await pool.query(
-        `INSERT INTO users (username, password, email, role) 
-         VALUES ('admin', $1, 'admin@solartech.it', 'master')`,
+        `INSERT INTO users (username, password, email, role, name) 
+         VALUES ('gbd', $1, 'gbd@solartech.it', 'master', 'GBD Admin')`,
         [hashedPassword]
       );
-      console.log('Utente admin creato (password: admin123)');
+      console.log('Utente gbd creato (password: password)');
     }
 
     console.log('Database inizializzato con successo!');
