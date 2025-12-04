@@ -1,0 +1,105 @@
+ reached the start of the range
+Dec 4, 2025, 9:54 PM
+scheduling build on Metal builder "builder-xojpoe"
+[snapshot] received sha256:95eb13edcf820f67a8e1faca4cbe60f0ba8a4e952613754100dbad90d80c63e1 md5:5bede405fbd2641d07ce9f2ab6b7428c
+receiving snapshot
+25.2 KB
+752ms
+analyzing snapshot
+25.2 KB
+2ms
+uploading snapshot
+25.2 KB
+863ms
+scheduling build on Metal builder "builder-xojpoe"
+fetched snapshot sha256:95eb13edcf820f67a8e1faca4cbe60f0ba8a4e952613754100dbad90d80c63e1 (26 kB bytes)
+fetching snapshot
+25.2 KB
+970ms
+unpacking archive
+120 KB
+3ms
+using build driver railpack-v0.15.1
+                   
+╭─────────────────╮
+│ Railpack 0.15.1 │
+╰─────────────────╯
+ 
+  ↳ Detected Node
+  ↳ Using npm package manager
+            
+  Packages  
+  ──────────
+  node  │  22.21.1  │  railpack default (22)
+            
+  Steps     
+  ──────────
+  ▸ install
+    $ npm ci
+         
+  ▸ build
+    $ npx tsx src/db/migrate.ts && npm start
+            
+  Deploy    
+  ──────────
+    $ npm run start
+ 
+
+load build definition from ./railpack-plan.json
+0ms
+
+copy /usr/local/bin/mise cached
+0ms
+
+install mise packages: node cached
+0ms
+
+copy /mise/installs, /mise/shims, /etc/mise/config.toml, /root/.local/state/mise cached
+0ms
+
+install apt packages: libatomic1 cached
+0ms
+
+copy package-lock.json cached
+0ms
+
+npm ci cached
+0ms
+
+mkdir -p /app/node_modules/.cache cached
+0ms
+
+copy / /app, package.json, . cached
+0ms
+
+npx tsx src/db/migrate.ts && npm start
+1s
+npm warn config production Use `--omit=dev` instead.
+Inizializzazione database SolarTech...
+Errore migrazione: AggregateError [ECONNREFUSED]: 
+    at /app/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async createTables (/app/src/db/migrate.ts:7:5) {
+  code: 'ECONNREFUSED',
+  [errors]: [
+    Error: connect ECONNREFUSED ::1:5432
+        at createConnectionError (node:net:1678:14)
+        at afterConnectMultiple (node:net:1708:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '::1',
+      port: 5432
+    },
+    Error: connect ECONNREFUSED 127.0.0.1:5432
+        at createConnectionError (node:net:1678:14)
+        at afterConnectMultiple (node:net:1708:16) {
+      errno: -111,
+      code: 'ECONNREFUSED',
+      syscall: 'connect',
+      address: '127.0.0.1',
+      port: 5432
+    }
+  ]
+}
+Build Failed: build daemon returned an error < failed to solve: process "sh -c npx tsx src/db/migrate.ts && npm start" did not complete successfully: exit code: 1
