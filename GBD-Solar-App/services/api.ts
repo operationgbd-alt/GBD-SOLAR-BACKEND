@@ -2,7 +2,7 @@ import Constants from 'expo-constants';
 
 // URL del backend
 const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl 
-  || 'https://solartech-backend-production.up.railway.app/api';
+  || 'https://gbd-solar-backend-production.up.railway.app/api';
 
 console.log('[API] Base URL:', API_BASE_URL);
 
