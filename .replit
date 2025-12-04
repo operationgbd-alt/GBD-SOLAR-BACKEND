@@ -6,3 +6,31 @@ packages = ["unzip"]
 [agent]
 expertMode = true
 integrations = ["javascript_openai:1.0.0"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "GBD Solar App"
+
+[[workflows.workflow]]
+name = "GBD Solar App"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd GBD-Solar-App && npm install && npx expo start --web --port 5000"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
