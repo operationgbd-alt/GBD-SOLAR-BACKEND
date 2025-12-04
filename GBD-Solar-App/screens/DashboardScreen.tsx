@@ -38,7 +38,7 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
 
   const userRole = user?.role?.toUpperCase();
-  const isMaster = userrole?.toUpperCase() === 'MASTER';
+  const isMaster = userRole?.toUpperCase() === 'MASTER';
   
   const techniciansCount = users.filter(u => u.role?.toUpperCase() === 'TECNICO').length;
   const globalStats = isMaster ? { ...getGlobalStats(), totalTechnicians: techniciansCount } : null;
