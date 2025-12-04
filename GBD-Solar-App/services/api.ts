@@ -50,7 +50,30 @@ async function apiRequest<T>(
 }
 
 export const api = {
-  // METODI MANCANTI - AGGIUNTI!
+  // Generic HTTP methods
+  get: async <T,>(endpoint: string) => {
+    return apiRequest<T>(endpoint, { method: 'GET' });
+  },
+
+  post: async <T,>(endpoint: string, body?: any) => {
+    return apiRequest<T>(endpoint, {
+      method: 'POST',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  },
+
+  patch: async <T,>(endpoint: string, body?: any) => {
+    return apiRequest<T>(endpoint, {
+      method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  },
+
+  delete: async <T,>(endpoint: string) => {
+    return apiRequest<T>(endpoint, { method: 'DELETE' });
+  },
+
+  // Token management
   setToken: (token: string | null) => {
     authToken = token;
     console.log('[API] Token set:', token ? 'YES' : 'NO');

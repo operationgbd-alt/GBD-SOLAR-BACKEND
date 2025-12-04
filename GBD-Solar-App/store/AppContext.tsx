@@ -1020,6 +1020,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         unassignedInterventions,
         isRefreshing,
         refreshFromServer,
+        refreshInterventions: refreshFromServer,
         addIntervention,
         updateIntervention,
         deleteIntervention,

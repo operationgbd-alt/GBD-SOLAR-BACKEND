@@ -5,9 +5,11 @@ export function useTheme() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const theme = Colors[colorScheme ?? "light"];
+  const colors = theme;
 
   return {
     theme,
+    colors,
     isDark,
   };
 }
