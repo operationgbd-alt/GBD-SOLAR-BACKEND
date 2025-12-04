@@ -139,3 +139,13 @@ initDatabase().then(() => {
     console.log(`Server SolarTech avviato su porta ${PORT}`);
   });
 });
+
+// DEBUG ENDPOINT - temp
+app.get('/api/debug/users', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, username, email, role, created_at FROM users');
+    res.json({ success: true, users: result.rows, count: result.rows.length });
+  } catch (error) {
+    res.json({ success: false, error: String(error) });
+  }
+});
