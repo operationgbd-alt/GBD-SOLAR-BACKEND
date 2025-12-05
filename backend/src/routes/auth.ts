@@ -7,7 +7,7 @@ const router = Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { username, password, email, role, companyId } = req.body;
+    const { username, password, name, email, role, companyId } = req.body;
 
     if (!username || !password || !role) {
       return res.status(400).json({ error: 'Username, password e ruolo sono obbligatori' });
@@ -25,10 +25,10 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      `INSERT INTO users (username, password, email, role, company_id) 
-       VALUES ($1, $2, $3, $4, $5) 
-       RETURNING id, username, email, role, company_id`,
-      [username, hashedPassword, email || null, role, companyId || null]
+      `INSERT INTO users (username, password, name, email, role, company_id) 
+       VALUES ($1, $2, $3, $4, $5, $6) 
+       RETURNING id, username, name, email, role, company_id`,
+      [username, hashedPassword, name || username, email || null, role, companyId || null]
     );
 
     const user = result.rows[0];
@@ -38,7 +38,7 @@ router.post('/register', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.status(201).json({ user, token });
+    res.status(201).json({ success: true, user, token });
   } catch (error) {
     console.error('Errore registrazione:', error);
     res.status(500).json({ error: 'Errore durante la registrazione' });

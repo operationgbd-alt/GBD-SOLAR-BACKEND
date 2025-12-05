@@ -12,6 +12,17 @@ interface AuthUser {
   companyName: string | null;
 }
 
+interface RegisterUserData {
+  username: string;
+  password: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  role: 'ditta' | 'tecnico';
+  companyId: string;
+  companyName?: string;
+}
+
 interface AuthContextType {
   user: AuthUser | null;
   isLoading: boolean;
@@ -19,6 +30,7 @@ interface AuthContextType {
   hasValidToken: boolean;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  registerUser: (userData: RegisterUserData) => Promise<{ success: boolean; error?: string; userId?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -132,6 +144,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const registerUser = useCallback(async (userData: RegisterUserData): Promise<{ success: boolean; error?: string; userId?: string }> => {
+    console.log('[AUTH] Registrazione utente:', userData.username);
+    
+    try {
+      const response = await fetch('https://gbd-solar-backend-production.up.railway.app/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: userData.username,
+          password: userData.password,
+          name: userData.name,
+          email: userData.email || null,
+          role: userData.role,
+          companyId: userData.companyId,
+        }),
+      });
+      
+      const data = await response.json();
+      console.log('[AUTH] Risposta registrazione:', JSON.stringify(data));
+      
+      if (!response.ok) {
+        return { success: false, error: data.error || 'Errore durante la registrazione' };
+      }
+      
+      console.log('[AUTH] Utente registrato con successo');
+      return { success: true, userId: String(data.user?.id) };
+    } catch (error: any) {
+      console.error('[AUTH] Errore registrazione:', error);
+      return { success: false, error: error?.message || 'Errore di connessione al server' };
+    }
+  }, []);
+
   const value: AuthContextType = {
     user,
     isLoading,
@@ -139,6 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     hasValidToken,
     login,
     logout,
+    registerUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
