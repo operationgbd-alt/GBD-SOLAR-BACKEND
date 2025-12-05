@@ -1,0 +1,84 @@
+scheduling build on Metal builder "builder-xojpoe"
+[snapshot] received sha256:e01cf9086ce9460bea21275e5c9331daab15c6b225d0df96e9bd5de5b0a8cdf4 md5:305a5d3bc9a60c0d3dcbaf26e75e0bb6
+receiving snapshot
+7.4 MB
+2.0s
+analyzing snapshot
+7.4 MB
+37ms
+uploading snapshot
+7.4 MB
+202ms
+scheduling build on Metal builder "builder-xojpoe"
+fetched snapshot sha256:e01cf9086ce9460bea21275e5c9331daab15c6b225d0df96e9bd5de5b0a8cdf4 (7.8 MB bytes)
+fetching snapshot
+7.4 MB
+309ms
+unpacking archive
+8.6 MB
+73ms
+using build driver railpack-v0.15.1
+                   
+╭─────────────────╮
+│ Railpack 0.15.1 │
+╰─────────────────╯
+ 
+  ↳ Detected Node
+  ↳ Using npm package manager
+            
+  Packages  
+  ──────────
+  node  │  22.21.1  │  railpack default (22)
+            
+  Steps     
+  ──────────
+  ▸ install
+    $ npm ci
+            
+  Deploy    
+  ──────────
+    $ node index.js
+ 
+
+load build definition from ./railpack-plan.json
+0ms
+
+install mise packages: node cached
+0ms
+
+copy package-lock.json, backend/package.json, GBD-Solar-App/package-lock.json cached
+0ms
+
+npm ci cached
+0ms
+
+copy package.json cached
+0ms
+
+mkdir -p /app/node_modules/.cache cached
+0ms
+
+copy backend/package-lock.json, GBD-Solar-App/package.json cached
+0ms
+
+copy / /app
+244ms
+
+copy /root/.cache, /root/.local/state/mise, /etc/mise/config.toml, /usr/local/bin/mise, /mise/installs, /mise/shims cached
+0ms
+
+copy /app
+525ms
+
+install apt packages: libatomic1 cached
+0ms
+
+copy /app/node_modules cached
+0ms
+
+exporting to docker image format
+1s
+containerimage.descriptor: eyJtZWRpYVR5cGUiOiJhcHBsaWNhdGlvbi92bmQub2NpLmltYWdlLm1hbmlmZXN0LnYxK2pzb24iLCJkaWdlc3QiOiJzaGEyNTY6MTAyZjkxMDg4ODVkNDE3OGNlMWEwOTkwMTlkNmMyOTAzNDI4MDcwN2MzZGJmYWI3Y2QxNjMzZjJiMjQ0MzIwNiIsInNpemUiOjIzODcsImFubm90YXRpb25zIjp7Im9yZy5vcGVuY29udGFpbmVycy5pbWFnZS5jcmVhdGVkIjoiMjAyNS0xMi0wNVQxMToxMjo0N1oifSwicGxhdGZvcm0iOnsiYXJjaGl0ZWN0dXJlIjoiYW1kNjQiLCJvcyI6ImxpbnV4In19
+containerimage.config.digest: sha256:90001e1e81815ac55151538f8cc339b31af2fb8213edbb3b70712f09b823c978
+containerimage.digest: sha256:102f9108885d4178ce1a099019d6c29034280707c3dbfab7cd1633f2b2443206
+image push
