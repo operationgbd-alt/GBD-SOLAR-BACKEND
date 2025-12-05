@@ -134,3 +134,17 @@ Preferred communication style: Simple, everyday language.
 - API URL configured via `API_URL` environment variable
 - Mobile apps built with EAS (Expo Application Services)
 - SSL/TLS for database connections in production
+
+## Recent Changes
+
+**December 2025 - Intervention Persistence Fix**:
+- Fixed intervention persistence: `addIntervention` now async function that saves to server when `hasValidToken` is true
+- Backend response format standardized to `{success: true, data: intervention}` for proper frontend handling
+- Added loading states on CreateInterventionScreen submit button
+- Debug logging added for troubleshooting sync issues
+
+**Known Issue - Railway Backend Configuration**:
+- The Railway backend deployment may be using a different DATABASE_URL than expected
+- To fix: Verify DATABASE_URL in Railway dashboard matches the PostgreSQL connection string
+- Local database setup script: `backend/setup_db.js` creates tables and admin user
+- Admin credentials: `admin / admin123` (once DATABASE_URL is properly configured)

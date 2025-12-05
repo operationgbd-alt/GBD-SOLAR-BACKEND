@@ -27,6 +27,7 @@ export function CreateInterventionScreen() {
   const { theme } = useTheme();
   const navigation = useNavigation();
   const { companies, users, addIntervention } = useApp();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     clientName: '',
@@ -47,7 +48,7 @@ export function CreateInterventionScreen() {
     u => u.role?.toUpperCase() === 'TECNICO' && u.companyId === formData.companyId
   );
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!formData.clientName.trim() || !formData.clientAddress.trim() || !formData.clientCity.trim()) {
       const msg = 'Inserisci nome, indirizzo e città del cliente';
       if (Platform.OS === 'web') {
@@ -58,6 +59,8 @@ export function CreateInterventionScreen() {
       return;
     }
 
+    setIsSubmitting(true);
+
     const company = formData.companyId 
       ? companies.find(c => c.id === formData.companyId)
       : null;
@@ -65,37 +68,57 @@ export function CreateInterventionScreen() {
       ? users.find(u => u.id === formData.technicianId)
       : null;
 
-    addIntervention({
-      client: {
-        name: formData.clientName.trim(),
-        address: formData.clientAddress.trim(),
-        civicNumber: formData.clientCivicNumber.trim(),
-        cap: formData.clientCap.trim(),
-        city: formData.clientCity.trim(),
-        phone: formData.clientPhone.trim(),
-        email: formData.clientEmail.trim(),
-      },
-      companyId: company?.id || null,
-      companyName: company?.name || null,
-      technicianId: technician?.id || null,
-      technicianName: technician?.name || null,
-      category: formData.category,
-      priority: formData.priority,
-      description: formData.description.trim(),
-      assignedAt: Date.now(),
-      assignedBy: 'Admin',
-      status: formData.companyId ? 'assegnato' : 'assegnato',
-      documentation: { photos: [], notes: '' },
-    });
+    try {
+      const success = await addIntervention({
+        client: {
+          name: formData.clientName.trim(),
+          address: formData.clientAddress.trim(),
+          civicNumber: formData.clientCivicNumber.trim(),
+          cap: formData.clientCap.trim(),
+          city: formData.clientCity.trim(),
+          phone: formData.clientPhone.trim(),
+          email: formData.clientEmail.trim(),
+        },
+        companyId: company?.id || null,
+        companyName: company?.name || null,
+        technicianId: technician?.id || null,
+        technicianName: technician?.name || null,
+        category: formData.category,
+        priority: formData.priority,
+        description: formData.description.trim(),
+        assignedAt: Date.now(),
+        assignedBy: 'Admin',
+        status: formData.companyId ? 'assegnato' : 'assegnato',
+        documentation: { photos: [], notes: '' },
+      });
 
-    const successMsg = 'Intervento creato con successo';
-    if (Platform.OS === 'web') {
-      window.alert(successMsg);
-    } else {
-      Alert.alert('Successo', successMsg);
+      if (success) {
+        const successMsg = 'Intervento creato con successo';
+        if (Platform.OS === 'web') {
+          window.alert(successMsg);
+        } else {
+          Alert.alert('Successo', successMsg);
+        }
+        navigation.goBack();
+      } else {
+        const errorMsg = 'Errore durante la creazione. Riprova.';
+        if (Platform.OS === 'web') {
+          window.alert(errorMsg);
+        } else {
+          Alert.alert('Errore', errorMsg);
+        }
+      }
+    } catch (error) {
+      console.error('[CREATE] Error:', error);
+      const errorMsg = 'Errore imprevisto. Riprova.';
+      if (Platform.OS === 'web') {
+        window.alert(errorMsg);
+      } else {
+        Alert.alert('Errore', errorMsg);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-
-    navigation.goBack();
   };
 
   return (
@@ -385,11 +408,14 @@ export function CreateInterventionScreen() {
       </Card>
 
       <Pressable
-        style={[styles.submitButton, { backgroundColor: theme.success }]}
+        style={[styles.submitButton, { backgroundColor: isSubmitting ? theme.textSecondary : theme.success }]}
         onPress={handleSubmit}
+        disabled={isSubmitting}
       >
-        <Feather name="check" size={20} color="#FFFFFF" />
-        <ThemedText style={styles.submitButtonText}>Crea Intervento</ThemedText>
+        <Feather name={isSubmitting ? "loader" : "check"} size={20} color="#FFFFFF" />
+        <ThemedText style={styles.submitButtonText}>
+          {isSubmitting ? 'Creazione in corso...' : 'Crea Intervento'}
+        </ThemedText>
       </Pressable>
 
       <View style={{ height: Spacing.xl }} />

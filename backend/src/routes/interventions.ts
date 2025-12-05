@@ -20,10 +20,32 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
     query += ' ORDER BY created_at DESC';
     
     const result = await pool.query(query, params);
-    res.json(result.rows);
+    
+    const interventions = result.rows.map(row => ({
+      id: String(row.id),
+      number: `INT-${new Date(row.created_at).getFullYear()}-${String(row.id).padStart(3, '0')}`,
+      clientName: row.client_name,
+      clientAddress: row.address,
+      clientPhone: row.phone,
+      clientEmail: row.email,
+      category: row.type,
+      priority: row.priority,
+      description: row.description,
+      status: row.status,
+      technicianId: row.technician_id ? String(row.technician_id) : null,
+      companyId: row.company_id ? String(row.company_id) : null,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      scheduledDate: row.scheduled_date,
+      notes: row.notes,
+      latitude: row.latitude,
+      longitude: row.longitude,
+    }));
+    
+    res.json({ success: true, data: interventions });
   } catch (error) {
     console.error('Errore lista interventi:', error);
-    res.status(500).json({ error: 'Errore nel recupero interventi' });
+    res.status(500).json({ success: false, error: 'Errore nel recupero interventi' });
   }
 });
 
@@ -49,20 +71,41 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
       description, technicianId, companyId, scheduledDate 
     } = req.body;
 
+    console.log('[CREATE] Received intervention data:', { clientName, address, type, priority, technicianId, companyId });
+
     const result = await pool.query(
       `INSERT INTO interventions 
        (client_name, address, phone, email, type, priority, description, 
         technician_id, company_id, scheduled_date, status, created_by)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'pending', $11)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, 'assegnato', $11)
        RETURNING *`,
-      [clientName, address, phone, email, type, priority || 'normal', 
-       description, technicianId, companyId, scheduledDate, req.user?.id]
+      [clientName, address, phone, email, type || 'installazione', priority || 'normale', 
+       description, technicianId || null, companyId || null, scheduledDate || null, req.user?.id]
     );
 
-    res.status(201).json(result.rows[0]);
+    const row = result.rows[0];
+    const intervention = {
+      id: String(row.id),
+      number: `INT-${new Date(row.created_at).getFullYear()}-${String(row.id).padStart(3, '0')}`,
+      clientName: row.client_name,
+      clientAddress: row.address,
+      clientPhone: row.phone,
+      clientEmail: row.email,
+      category: row.type,
+      priority: row.priority,
+      description: row.description,
+      status: row.status,
+      technicianId: row.technician_id ? String(row.technician_id) : null,
+      companyId: row.company_id ? String(row.company_id) : null,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+
+    console.log('[CREATE] Intervention created with ID:', intervention.id);
+    res.status(201).json({ success: true, data: intervention });
   } catch (error) {
     console.error('Errore creazione intervento:', error);
-    res.status(500).json({ error: 'Errore nella creazione intervento' });
+    res.status(500).json({ success: false, error: 'Errore nella creazione intervento' });
   }
 });
 

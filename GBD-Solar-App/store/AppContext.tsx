@@ -17,7 +17,7 @@ interface AppContextType {
   unassignedInterventions: Intervention[];
   isRefreshing: boolean;
   refreshFromServer: () => Promise<void>;
-  addIntervention: (intervention: Omit<Intervention, 'id' | 'number' | 'createdAt' | 'updatedAt'>) => void;
+  addIntervention: (intervention: Omit<Intervention, 'id' | 'number' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
   updateIntervention: (id: string, updates: Partial<Intervention>) => void;
   deleteIntervention: (id: string) => void;
   bulkAssignToCompany: (interventionIds: string[], companyId: string, companyName: string) => void;
@@ -861,17 +861,71 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return [];
   }, [user, usersData]);
 
-  const addIntervention = useCallback((intervention: Omit<Intervention, 'id' | 'number' | 'createdAt' | 'updatedAt'>) => {
+  const addIntervention = useCallback(async (intervention: Omit<Intervention, 'id' | 'number' | 'createdAt' | 'updatedAt'>): Promise<boolean> => {
+    console.log('[CREATE] Starting addIntervention, hasValidToken:', hasValidToken);
     const now = Date.now();
+    const localId = generateId();
+    const localNumber = generateInterventionNumber();
+    
     const newIntervention: Intervention = {
       ...intervention,
-      id: generateId(),
-      number: generateInterventionNumber(),
+      id: localId,
+      number: localNumber,
       createdAt: now,
       updatedAt: now,
     };
+    
     setInterventionsData(prev => [newIntervention, ...prev]);
-  }, []);
+    
+    if (hasValidToken) {
+      try {
+        console.log('[CREATE] Saving intervention to server...');
+        console.log('[CREATE] Client data:', intervention.client);
+        const fullAddress = [
+          intervention.client?.address,
+          intervention.client?.civicNumber,
+          intervention.client?.cap,
+          intervention.client?.city
+        ].filter(Boolean).join(' ');
+        
+        const response = await api.createIntervention({
+          clientName: intervention.client?.name || '',
+          address: fullAddress || '',
+          phone: intervention.client?.phone || '',
+          email: intervention.client?.email || '',
+          type: intervention.category || 'installazione',
+          priority: intervention.priority || 'normale',
+          description: intervention.description || '',
+          technicianId: intervention.technicianId || null,
+          companyId: intervention.companyId || null,
+        });
+        
+        if (response.success && response.data) {
+          console.log('[CREATE] Server saved, ID:', response.data.id, 'Number:', response.data.number);
+          setInterventionsData(prev => prev.map(i => 
+            i.id === localId 
+              ? { 
+                  ...i, 
+                  id: String(response.data.id), 
+                  number: response.data.number || localNumber 
+                }
+              : i
+          ));
+          return true;
+        } else {
+          console.warn('[CREATE] Server save failed:', response);
+          setInterventionsData(prev => prev.filter(i => i.id !== localId));
+          return false;
+        }
+      } catch (error) {
+        console.error('[CREATE] Error saving to server:', error);
+        setInterventionsData(prev => prev.filter(i => i.id !== localId));
+        return false;
+      }
+    }
+    
+    return true;
+  }, [hasValidToken]);
 
   const updateIntervention = useCallback((id: string, updates: Partial<Intervention>) => {
     setInterventionsData(prev =>
@@ -1020,7 +1074,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         unassignedInterventions,
         isRefreshing,
         refreshFromServer,
-        refreshInterventions: refreshFromServer,
         addIntervention,
         updateIntervention,
         deleteIntervention,
