@@ -1,14 +1,13 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ActivityIndicator,
   Dimensions,
   Platform,
   Pressable,
 } from 'react-native';
-import MapView, { Marker, PROVIDER_GOOGLE, AnimatedRegion, Callout } from 'react-native-maps';
+import MapView, { Marker, PROVIDER_GOOGLE, Callout } from 'react-native-maps';
 import ClusteredMapView from 'react-native-map-clustering';
 import { Feather } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
@@ -52,17 +51,14 @@ const isValidCoordinate = (lat: any, lng: any): boolean => {
   return true;
 };
 
-const TechnicianMarker = memo(({ 
-  tech, 
-  isOnline,
-  onPress,
-  theme 
-}: { 
-  tech: User; 
+interface MarkerProps {
+  tech: User;
   isOnline: boolean;
   onPress: () => void;
-  theme: any;
-}) => {
+  colors: typeof Colors.light;
+}
+
+const TechnicianMarker = memo(({ tech, isOnline, onPress, colors }: MarkerProps) => {
   const lat = tech.lastLocation?.latitude;
   const lng = tech.lastLocation?.longitude;
   
@@ -92,9 +88,9 @@ const TechnicianMarker = memo(({
         ]} />
       </View>
       <Callout tooltip onPress={onPress}>
-        <View style={[styles.callout, { backgroundColor: theme.backgroundDefault }]}>
-          <Text style={[styles.calloutTitle, { color: theme.text }]}>{tech.name}</Text>
-          <Text style={[styles.calloutSubtitle, { color: theme.textSecondary }]}>
+        <View style={[styles.callout, { backgroundColor: colors.backgroundDefault }]}>
+          <Text style={[styles.calloutTitle, { color: colors.text }]}>{tech.name}</Text>
+          <Text style={[styles.calloutSubtitle, { color: colors.textSecondary }]}>
             {tech.companyName || 'Azienda'}
           </Text>
           <View style={styles.calloutStatus}>
@@ -102,7 +98,7 @@ const TechnicianMarker = memo(({
               styles.statusDot,
               { backgroundColor: isOnline ? '#4CAF50' : '#9E9E9E' }
             ]} />
-            <Text style={[styles.calloutStatusText, { color: theme.textSecondary }]}>
+            <Text style={[styles.calloutStatusText, { color: colors.textSecondary }]}>
               {isOnline ? 'Online' : 'Offline'}
             </Text>
           </View>
@@ -118,14 +114,12 @@ export function TechnicianMap({
   technicians,
   initialRegion,
   onMarkerPress,
-  onCallTech,
   mapRef,
   onlineTechnicians,
   offlineTechnicians,
 }: TechnicianMapProps) {
-  const { theme } = useTheme();
+  const { colors } = useTheme();
   const [mapReady, setMapReady] = useState(false);
-  const [region, setRegion] = useState(initialRegion || ITALY_REGION);
   
   const validTechnicians = useMemo(() => {
     return technicians.filter(tech => {
@@ -158,14 +152,10 @@ export function TechnicianMap({
         }
       }
     }
-  }, [mapReady, validTechnicians]);
+  }, [mapReady, validTechnicians, mapRef]);
 
   const handleMapReady = useCallback(() => {
     setMapReady(true);
-  }, []);
-
-  const handleRegionChange = useCallback((newRegion: any) => {
-    setRegion(newRegion);
   }, []);
 
   const renderCluster = useCallback((cluster: any) => {
@@ -183,19 +173,19 @@ export function TechnicianMap({
         onPress={onPress}
       >
         <View style={styles.clusterContainer}>
-          <View style={[styles.cluster, { backgroundColor: Colors.primary }]}>
+          <View style={[styles.cluster, { backgroundColor: colors.primary }]}>
             <Text style={styles.clusterText}>{points}</Text>
           </View>
         </View>
       </Marker>
     );
-  }, []);
+  }, [colors.primary]);
 
   if (Platform.OS === 'web') {
     return (
-      <View style={[styles.webNotice, { backgroundColor: theme.primaryLight }]}>
-        <Feather name="info" size={16} color={theme.primary} />
-        <Text style={[styles.webNoticeText, { color: theme.primary }]}>
+      <View style={[styles.webNotice, { backgroundColor: colors.primaryLight }]}>
+        <Feather name="info" size={16} color={colors.primary} />
+        <Text style={[styles.webNoticeText, { color: colors.primary }]}>
           La mappa interattiva e disponibile solo nell'app mobile. Qui puoi vedere la lista dei tecnici.
         </Text>
       </View>
@@ -204,32 +194,33 @@ export function TechnicianMap({
 
   if (validTechnicians.length === 0) {
     return (
-      <View style={[styles.emptyContainer, { backgroundColor: theme.backgroundDefault }]}>
-        <Feather name="map-pin" size={48} color={theme.textTertiary} />
-        <Text style={[styles.emptyText, { color: theme.textSecondary }]}>
+      <View style={[styles.emptyContainer, { backgroundColor: colors.backgroundDefault }]}>
+        <Feather name="map-pin" size={48} color={colors.textTertiary} />
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
           Nessun tecnico con posizione GPS disponibile
         </Text>
       </View>
     );
   }
 
+  const MapComponent = ClusteredMapView as any;
+
   return (
     <View style={styles.container}>
-      <ClusteredMapView
+      <MapComponent
         ref={mapRef}
         style={styles.map}
         provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
         initialRegion={initialRegion || ITALY_REGION}
         onMapReady={handleMapReady}
-        onRegionChangeComplete={handleRegionChange}
         showsUserLocation
         showsMyLocationButton
         showsCompass
         showsScale
         loadingEnabled
-        loadingIndicatorColor={Colors.primary}
+        loadingIndicatorColor={colors.primary}
         moveOnMarkerPress={false}
-        clusterColor={Colors.primary}
+        clusterColor={colors.primary}
         clusterTextColor="#fff"
         clusterFontFamily="System"
         radius={50}
@@ -241,7 +232,7 @@ export function TechnicianMap({
         renderCluster={renderCluster}
         animationEnabled
         spiralEnabled
-        spiderLineColor={Colors.primary}
+        spiderLineColor={colors.primary}
       >
         {validTechnicians.map((tech) => (
           <TechnicianMarker
@@ -249,22 +240,22 @@ export function TechnicianMap({
             tech={tech}
             isOnline={onlineIds.has(tech.id)}
             onPress={() => onMarkerPress(tech)}
-            theme={theme}
+            colors={colors}
           />
         ))}
-      </ClusteredMapView>
+      </MapComponent>
 
-      <View style={[styles.legend, { backgroundColor: theme.backgroundDefault }]}>
+      <View style={[styles.legend, { backgroundColor: colors.backgroundDefault }]}>
         <View style={styles.legendRow}>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#4CAF50' }]} />
-            <Text style={[styles.legendText, { color: theme.text }]}>
+            <Text style={[styles.legendText, { color: colors.text }]}>
               Online ({onlineTechnicians.length})
             </Text>
           </View>
           <View style={styles.legendItem}>
             <View style={[styles.legendDot, { backgroundColor: '#9E9E9E' }]} />
-            <Text style={[styles.legendText, { color: theme.text }]}>
+            <Text style={[styles.legendText, { color: colors.text }]}>
               Offline ({offlineTechnicians.length})
             </Text>
           </View>
@@ -272,7 +263,7 @@ export function TechnicianMap({
       </View>
 
       <Pressable
-        style={[styles.centerButton, { backgroundColor: theme.backgroundDefault }]}
+        style={[styles.centerButton, { backgroundColor: colors.backgroundDefault }]}
         onPress={() => {
           if (mapRef.current && validTechnicians.length > 0) {
             const coords = validTechnicians
@@ -288,7 +279,7 @@ export function TechnicianMap({
           }
         }}
       >
-        <Feather name="maximize" size={20} color={theme.primary} />
+        <Feather name="maximize" size={20} color={colors.primary} />
       </Pressable>
     </View>
   );
