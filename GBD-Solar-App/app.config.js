@@ -7,17 +7,13 @@ export default ({ config }) => {
     orientation: "portrait",
     userInterfaceStyle: "automatic",
     
-    icon: undefined,
-    splash: undefined,
-    
     ios: {
       supportsTablet: true,
-      bundleIdentifier: "com.solartech.app",
+      bundleIdentifier: "com.operationgbd.solartech",
     },
     
     android: {
-      package: "com.solartech.app",
-      adaptiveIcon: undefined,
+      package: "com.operationgbd.solartech",
       permissions: [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -28,14 +24,29 @@ export default ({ config }) => {
     },
     
     web: {
-      favicon: undefined,
+      bundler: "metro",
     },
     
     plugins: [
       "expo-secure-store",
-      "expo-location",
-      "expo-camera",
-      "expo-image-picker",
+      [
+        "expo-location",
+        {
+          locationAlwaysAndWhenInUsePermission: "Allow SolarTech to access your location."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          cameraPermission: "Allow SolarTech to access your camera."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          photosPermission: "Allow SolarTech to access your photos."
+        }
+      ],
     ],
     
     extra: {
