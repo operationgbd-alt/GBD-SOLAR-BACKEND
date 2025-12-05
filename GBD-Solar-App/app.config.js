@@ -40,7 +40,7 @@ export default ({ config }) => {
     
     extra: {
       ...config.extra,
-      apiUrl: process.env.API_URL ?? 'https://solartech-backend-production.up.railway.app/api',
+      apiUrl: process.env.API_URL ?? 'https://gbd-solar-backend-production.up.railway.app/api',
     },
   };
 };

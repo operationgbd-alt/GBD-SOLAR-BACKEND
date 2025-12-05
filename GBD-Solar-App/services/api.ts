@@ -1,8 +1,5 @@
-import Constants from 'expo-constants';
-
-// URL del backend
-const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl 
-  || 'https://gbd-solar-backend-production.up.railway.app/api';
+// URL del backend Railway
+const API_BASE_URL = 'https://gbd-solar-backend-production.up.railway.app/api';
 
 console.log('[API] Base URL:', API_BASE_URL);
 
