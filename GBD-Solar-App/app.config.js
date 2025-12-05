@@ -29,6 +29,8 @@ export default ({ config }) => {
     
     plugins: [
       "expo-secure-store",
+      "expo-mail-composer",
+      "expo-web-browser",
       [
         "expo-location",
         {
