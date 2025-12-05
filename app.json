@@ -1,12 +1,14 @@
 {
   "expo": {
+    "name": "SolarTech",
+    "slug": "solartech",
     "extra": {
       "eas": {
-        "projectId": "7ff79a69-3e2d-4670-bc30-8f3c4e3ca8d5"
+        "projectId": "8c5ef59e-4ced-4c8e-a230-bd709c0bbee6"
       }
     },
     "android": {
-      "package": "com.operationgbd.workspace"
+      "package": "com.operationgbd.solartech"
     }
   }
 }
