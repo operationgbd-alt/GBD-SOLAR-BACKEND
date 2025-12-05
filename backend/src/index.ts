@@ -149,3 +149,20 @@ app.get('/api/debug/users', async (req, res) => {
     res.json({ success: false, error: String(error) });
   }
 });
+
+// Database check endpoint
+app.get('/api/debug/db-check', async (req, res) => {
+  try {
+    const dbUrl = process.env.DATABASE_URL || 'not set';
+    const maskedUrl = dbUrl.replace(/:[^:@]+@/, ':****@');
+    const users = await pool.query('SELECT id, username, role FROM users LIMIT 5');
+    res.json({ 
+      success: true, 
+      database_url: maskedUrl,
+      users: users.rows,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.json({ success: false, error: String(error) });
+  }
+});
