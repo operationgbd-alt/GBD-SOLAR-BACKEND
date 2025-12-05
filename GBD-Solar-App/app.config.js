@@ -2,7 +2,7 @@ export default ({ config }) => {
   return {
     ...config,
     name: "SolarTech",
-    slug: "solartech",
+    slug: "workspace",
     version: "1.0.0",
     orientation: "portrait",
     userInterfaceStyle: "automatic",
