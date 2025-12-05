@@ -104,8 +104,15 @@ Preferred communication style: Simple, everyday language.
 - **Expo modules**: Camera, Location, Image Picker, Notifications, Secure Store
 - **React Navigation**: Navigation library for mobile-first routing
 - **React Native Reanimated**: Animation library for smooth UI transitions
-- **React Native Maps**: Native map integration for technician tracking
+- **React Native Maps**: Native map integration for technician tracking with clustering
+- **react-native-map-clustering**: Automatic marker clustering for performance
 - **Expo Mail Composer**: Email composition for sending reports
+
+**Map Performance Optimizations**:
+- Marker clustering with react-native-map-clustering (groups nearby markers)
+- Memoized markers with React.memo to prevent unnecessary re-renders
+- tracksViewChanges={false} on markers for better scroll performance
+- Platform-specific implementations: native ClusteredMapView for mobile, simplified UI for web
 
 **Backend Services**:
 - **PostgreSQL**: Primary database (expected to be Railway-hosted in production)
