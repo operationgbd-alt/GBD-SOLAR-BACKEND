@@ -4,6 +4,7 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "base": "GBD-Solar-App",
     "development": {
       "developmentClient": true,
       "distribution": "internal",
