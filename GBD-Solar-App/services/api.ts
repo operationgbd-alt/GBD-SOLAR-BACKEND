@@ -85,10 +85,25 @@ export const api = {
 
   // Auth
   login: async (username: string, password: string) => {
-    return apiRequest<{ success: boolean; data: { token: string; user: any }; error?: string }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      
+      const data = await response.json();
+      console.log('[API] Login response:', JSON.stringify(data));
+      
+      if (!response.ok) {
+        return { success: false, error: data.error || 'Login fallito', data: null };
+      }
+      
+      return data;
+    } catch (error: any) {
+      console.error('[API] Login error:', error);
+      return { success: false, error: error.message || 'Errore di connessione', data: null };
+    }
   },
 
   // Users

@@ -50,7 +50,7 @@ router.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res.status(400).json({ error: 'Username e password sono obbligatori' });
+      return res.status(400).json({ success: false, error: 'Username e password sono obbligatori' });
     }
 
     const result = await pool.query(
@@ -59,14 +59,14 @@ router.post('/login', async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Credenziali non valide' });
+      return res.status(401).json({ success: false, error: 'Credenziali non valide' });
     }
 
     const user = result.rows[0];
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
-      return res.status(401).json({ error: 'Credenziali non valide' });
+      return res.status(401).json({ success: false, error: 'Credenziali non valide' });
     }
 
     const token = jwt.sign(
@@ -76,18 +76,22 @@ router.post('/login', async (req, res) => {
     );
 
     res.json({
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        companyId: user.company_id
-      },
-      token
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          name: user.name || user.username,
+          email: user.email,
+          role: user.role,
+          companyId: user.company_id
+        }
+      }
     });
   } catch (error) {
     console.error('Errore login:', error);
-    res.status(500).json({ error: 'Errore durante il login' });
+    res.status(500).json({ success: false, error: 'Errore durante il login' });
   }
 });
 
