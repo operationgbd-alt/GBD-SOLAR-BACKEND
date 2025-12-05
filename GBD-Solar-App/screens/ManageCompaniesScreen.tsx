@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Pressable, TextInput, Alert, Platform } from 'react-native';
+import { View, StyleSheet, Pressable, TextInput, Alert, Platform, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { ScreenScrollView } from '@/components/ScreenScrollView';
 import { ThemedText } from '@/components/ThemedText';
@@ -7,14 +7,16 @@ import { Card } from '@/components/Card';
 import { useTheme } from '@/hooks/useTheme';
 import { useApp } from '@/store/AppContext';
 import { useAuth } from '@/store/AuthContext';
+import { api } from '@/services/api';
 import { Spacing, BorderRadius, Typography } from '@/constants/theme';
 import { Company } from '@/types';
 
 export function ManageCompaniesScreen() {
   const { theme } = useTheme();
-  const { companies, addCompany, deleteCompany, getUsersByCompany, addUser } = useApp();
+  const { companies, addCompany, deleteCompany, getUsersByCompany, addUser, refreshFromServer } = useApp();
   const { registerUser } = useAuth();
   const [showForm, setShowForm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -63,16 +65,28 @@ export function ManageCompaniesScreen() {
     const username = formData.username.trim().toLowerCase();
     const password = formData.password;
 
-    const companyId = addCompany({
-      name: companyName,
-      address: companyAddress,
-      phone: companyPhone,
-      email: companyEmail,
-      username: username,
-      password: password,
-    });
+    setIsLoading(true);
 
     try {
+      console.log('[COMPANY] Creating company in backend...');
+      const companyResponse = await api.post<any>('/companies', {
+        name: companyName,
+        address: companyAddress,
+        phone: companyPhone,
+        email: companyEmail,
+      });
+      
+      console.log('[COMPANY] Backend response:', JSON.stringify(companyResponse));
+      
+      const backendCompanyId = companyResponse.id || companyResponse.data?.id;
+      
+      if (!backendCompanyId) {
+        throw new Error('ID ditta non ricevuto dal server');
+      }
+      
+      console.log('[COMPANY] Company created with ID:', backendCompanyId);
+      
+      console.log('[COMPANY] Registering user for company...');
       const registerResult = await registerUser({
         username: username,
         password: password,
@@ -80,44 +94,43 @@ export function ManageCompaniesScreen() {
         email: companyEmail,
         phone: companyPhone,
         role: 'ditta',
-        companyId: companyId,
+        companyId: String(backendCompanyId),
         companyName: companyName,
       });
 
       if (!registerResult.success) {
-        deleteCompany(companyId);
+        console.log('[COMPANY] User registration failed:', registerResult.error);
         const errorMsg = registerResult.error || 'Errore durante la creazione dell\'account';
         if (Platform.OS === 'web') {
           window.alert(errorMsg);
         } else {
           Alert.alert('Errore', errorMsg);
         }
+        setIsLoading(false);
         return;
       }
 
-      addUser({
-        username: username,
-        name: companyName,
-        email: companyEmail,
-        phone: companyPhone,
-        role: 'ditta',
-        companyId: companyId,
-        companyName: companyName,
-      }, registerResult.userId);
+      console.log('[COMPANY] User registered, refreshing data...');
+      
+      if (refreshFromServer) {
+        await refreshFromServer();
+      }
 
       const successMsg = `Ditta "${companyName}" creata con successo!\n\nCredenziali:\nUsername: ${username}\nPassword: ${password}`;
 
       setFormData({ name: '', address: '', phone: '', email: '', username: '', password: '' });
       setShowForm(false);
+      setIsLoading(false);
 
       if (Platform.OS === 'web') {
         window.alert(successMsg);
       } else {
         Alert.alert('Ditta Creata', successMsg);
       }
-    } catch (error) {
-      deleteCompany(companyId);
-      const errorMsg = 'Errore durante la creazione dell\'account. Riprova.';
+    } catch (error: any) {
+      console.error('[COMPANY] Error:', error);
+      setIsLoading(false);
+      const errorMsg = error?.message || 'Errore durante la creazione della ditta. Riprova.';
       if (Platform.OS === 'web') {
         window.alert(errorMsg);
       } else {
@@ -338,11 +351,18 @@ export function ManageCompaniesScreen() {
           </View>
 
           <Pressable
-            style={[styles.submitButton, { backgroundColor: theme.success }]}
+            style={[styles.submitButton, { backgroundColor: theme.success, opacity: isLoading ? 0.7 : 1 }]}
             onPress={handleSubmit}
+            disabled={isLoading}
           >
-            <Feather name="check" size={20} color="#FFFFFF" />
-            <ThemedText style={styles.submitButtonText}>Crea Ditta</ThemedText>
+            {isLoading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Feather name="check" size={20} color="#FFFFFF" />
+            )}
+            <ThemedText style={styles.submitButtonText}>
+              {isLoading ? 'Creazione in corso...' : 'Crea Ditta'}
+            </ThemedText>
           </Pressable>
         </Card>
       ) : null}
