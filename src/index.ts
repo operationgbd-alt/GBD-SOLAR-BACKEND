@@ -10,6 +10,7 @@ import appointmentRoutes from './routes/appointments';
 import companyRoutes from './routes/companies';
 import userRoutes from './routes/users';
 import reportRoutes from './routes/reports';
+import photoRoutes from './routes/photos';
 
 dotenv.config();
 
@@ -83,6 +84,18 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS photos (
+        id SERIAL PRIMARY KEY,
+        intervention_id INTEGER REFERENCES interventions(id) ON DELETE CASCADE,
+        photo_data TEXT,
+        photo_url TEXT,
+        mime_type VARCHAR(50) DEFAULT 'image/jpeg',
+        description TEXT,
+        uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_photos_intervention ON photos(intervention_id);
       CREATE INDEX IF NOT EXISTS idx_interventions_status ON interventions(status);
       CREATE INDEX IF NOT EXISTS idx_interventions_technician ON interventions(technician_id);
       CREATE INDEX IF NOT EXISTS idx_interventions_company ON interventions(company_id);
@@ -131,6 +144,7 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/photos', photoRoutes);
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err.message);
