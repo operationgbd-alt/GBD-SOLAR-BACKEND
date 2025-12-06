@@ -76,6 +76,9 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
       updatedAt: row.updated_at,
       scheduledDate: row.scheduled_date,
       notes: row.notes,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      locationCapturedAt: row.location_captured_at,
     };
     
     res.json({ success: true, data: intervention });
