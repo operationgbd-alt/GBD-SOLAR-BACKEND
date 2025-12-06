@@ -122,14 +122,16 @@ async function initDatabase() {
 
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'SolarTech API v1.0',
+    message: 'SolarTech API v1.1',
     status: 'online',
     endpoints: {
       auth: '/api/auth',
       interventions: '/api/interventions',
       appointments: '/api/appointments',
       companies: '/api/companies',
-      users: '/api/users'
+      users: '/api/users',
+      photos: '/api/photos',
+      reports: '/api/reports'
     }
   });
 });
