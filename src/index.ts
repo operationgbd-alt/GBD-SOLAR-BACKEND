@@ -11,6 +11,7 @@ import companyRoutes from './routes/companies';
 import userRoutes from './routes/users';
 import reportRoutes from './routes/reports';
 import photoRoutes from './routes/photos';
+import locationRoutes from './routes/locations';
 
 dotenv.config();
 
@@ -95,12 +96,21 @@ async function initDatabase() {
         created_at TIMESTAMP DEFAULT NOW()
       );
 
+      CREATE TABLE IF NOT EXISTS technician_locations (
+        user_id INTEGER PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+        latitude DECIMAL(10, 8) NOT NULL,
+        longitude DECIMAL(11, 8) NOT NULL,
+        accuracy DECIMAL(6, 2),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+
       CREATE INDEX IF NOT EXISTS idx_photos_intervention ON photos(intervention_id);
       CREATE INDEX IF NOT EXISTS idx_interventions_status ON interventions(status);
       CREATE INDEX IF NOT EXISTS idx_interventions_technician ON interventions(technician_id);
       CREATE INDEX IF NOT EXISTS idx_interventions_company ON interventions(company_id);
       CREATE INDEX IF NOT EXISTS idx_appointments_user ON appointments(user_id);
       CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date);
+      CREATE INDEX IF NOT EXISTS idx_technician_locations_updated ON technician_locations(updated_at);
     `);
     console.log('Tabelle create/verificate!');
     
@@ -154,6 +164,7 @@ app.use('/api/companies', companyRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/photos', photoRoutes);
+app.use('/api/locations', locationRoutes);
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err.message);
