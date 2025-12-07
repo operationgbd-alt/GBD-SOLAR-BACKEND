@@ -8,9 +8,14 @@ router.post('/update', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { latitude, longitude, accuracy } = req.body;
     const userId = req.user?.id;
+    const userRole = req.user?.role;
 
     if (!userId) {
       return res.status(401).json({ success: false, error: 'Non autenticato' });
+    }
+
+    if (userRole !== 'tecnico') {
+      return res.status(403).json({ success: false, error: 'Solo i tecnici possono aggiornare la posizione' });
     }
 
     if (!latitude || !longitude) {
