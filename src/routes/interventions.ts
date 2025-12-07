@@ -138,7 +138,8 @@ router.put('/:id', authenticateToken, async (req: AuthRequest, res) => {
     const { id } = req.params;
     const { 
       clientName, address, phone, email, type, priority, 
-      description, technicianId, companyId, status, scheduledDate, notes 
+      description, technicianId, companyId, status, scheduledDate, notes,
+      latitude, longitude 
     } = req.body;
 
     console.log('[UPDATE] Full body received:', JSON.stringify(req.body));
@@ -191,15 +192,18 @@ router.put('/:id', authenticateToken, async (req: AuthRequest, res) => {
        status = COALESCE($12, status),
        scheduled_date = COALESCE($13, scheduled_date),
        notes = COALESCE($14, notes),
+       latitude = COALESCE($15, latitude),
+       longitude = COALESCE($16, longitude),
+       location_captured_at = CASE WHEN $15 IS NOT NULL THEN NOW() ELSE location_captured_at END,
        updated_at = NOW()
-       WHERE id = $15 RETURNING *`,
+       WHERE id = $17 RETURNING *`,
       [
         clientName, address, phone, email, type, priority, description,
         technicianIdValue === undefined ? 'KEEP' : 'SET',
         technicianIdValue === undefined ? null : technicianIdValue,
         companyIdValue === undefined ? 'KEEP' : 'SET',
         companyIdValue === undefined ? null : companyIdValue,
-        status, scheduledDate, notes, id
+        status, scheduledDate, notes, latitude, longitude, id
       ]
     );
     
