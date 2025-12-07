@@ -61,17 +61,24 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
 
 router.post('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    const { intervention_id, photo_data, photo_url, mime_type, description } = req.body;
+    const { intervention_id, interventionId, photo_data, photoData, photo_url, photoUrl, mime_type, mimeType, description } = req.body;
     
-    if (!intervention_id) {
+    const finalInterventionId = intervention_id || interventionId;
+    const finalPhotoData = photo_data || photoData;
+    const finalPhotoUrl = photo_url || photoUrl;
+    const finalMimeType = mime_type || mimeType || 'image/jpeg';
+    
+    console.log('[PHOTO UPLOAD] Received:', { interventionId: finalInterventionId, hasPhotoData: !!finalPhotoData, photoDataLength: finalPhotoData?.length, hasPhotoUrl: !!finalPhotoUrl });
+    
+    if (!finalInterventionId) {
       return res.status(400).json({ success: false, error: 'intervention_id richiesto' });
     }
     
-    if (!photo_data && !photo_url) {
+    if (!finalPhotoData && !finalPhotoUrl) {
       return res.status(400).json({ success: false, error: 'photo_data o photo_url richiesto' });
     }
     
-    const interventionCheck = await pool.query('SELECT id FROM interventions WHERE id = $1', [intervention_id]);
+    const interventionCheck = await pool.query('SELECT id FROM interventions WHERE id = $1', [finalInterventionId]);
     if (interventionCheck.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Intervento non trovato' });
     }
@@ -80,7 +87,7 @@ router.post('/', authenticateToken, async (req: AuthRequest, res) => {
       `INSERT INTO photos (intervention_id, photo_data, photo_url, mime_type, description, uploaded_by)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [intervention_id, photo_data || null, photo_url || null, mime_type || 'image/jpeg', description || null, req.user?.id]
+      [finalInterventionId, finalPhotoData || null, finalPhotoUrl || null, finalMimeType, description || null, req.user?.id]
     );
     
     const row = result.rows[0];
