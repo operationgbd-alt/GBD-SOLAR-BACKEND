@@ -6,18 +6,23 @@ const router = Router();
 
 router.get('/', authenticateToken, async (req: AuthRequest, res) => {
   try {
-    let query = 'SELECT * FROM interventions';
+    let query = `
+      SELECT i.*, c.name as company_name, u.name as technician_name
+      FROM interventions i
+      LEFT JOIN companies c ON i.company_id = c.id
+      LEFT JOIN users u ON i.technician_id = u.id
+    `;
     const params: any[] = [];
 
     if (req.user?.role === 'tecnico') {
-      query += ' WHERE technician_id = $1';
+      query += ' WHERE i.technician_id = $1';
       params.push(req.user.id);
     } else if (req.user?.role === 'ditta') {
-      query += ' WHERE company_id = $1';
+      query += ' WHERE i.company_id = $1';
       params.push(req.user.companyId);
     }
 
-    query += ' ORDER BY created_at DESC';
+    query += ' ORDER BY i.created_at DESC';
     
     const result = await pool.query(query, params);
     
@@ -33,7 +38,9 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       description: row.description,
       status: row.status,
       technicianId: row.technician_id ? String(row.technician_id) : null,
+      technicianName: row.technician_name || null,
       companyId: row.company_id ? String(row.company_id) : null,
+      companyName: row.company_name || null,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       scheduledDate: row.scheduled_date,
@@ -52,7 +59,13 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
 router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
-    const result = await pool.query('SELECT * FROM interventions WHERE id = $1', [id]);
+    const result = await pool.query(`
+      SELECT i.*, c.name as company_name, u.name as technician_name
+      FROM interventions i
+      LEFT JOIN companies c ON i.company_id = c.id
+      LEFT JOIN users u ON i.technician_id = u.id
+      WHERE i.id = $1
+    `, [id]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Intervento non trovato' });
@@ -71,7 +84,9 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
       description: row.description,
       status: row.status,
       technicianId: row.technician_id ? String(row.technician_id) : null,
+      technicianName: row.technician_name || null,
       companyId: row.company_id ? String(row.company_id) : null,
+      companyName: row.company_name || null,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       scheduledDate: row.scheduled_date,
