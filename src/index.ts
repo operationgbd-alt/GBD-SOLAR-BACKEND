@@ -103,6 +103,13 @@ async function initDatabase() {
       CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(date);
     `);
     console.log('Tabelle create/verificate!');
+    
+    await pool.query(`
+      ALTER TABLE interventions ADD COLUMN IF NOT EXISTS latitude DECIMAL(10, 8);
+      ALTER TABLE interventions ADD COLUMN IF NOT EXISTS longitude DECIMAL(11, 8);
+      ALTER TABLE interventions ADD COLUMN IF NOT EXISTS location_captured_at TIMESTAMP;
+    `);
+    console.log('Colonne GPS verificate!');
 
     const adminExists = await pool.query("SELECT id FROM users WHERE username = 'admin'");
     if (adminExists.rows.length === 0) {
