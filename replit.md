@@ -137,6 +137,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**December 2025 - PDF Generation Enhancement**:
+- Added professional PDF report generation endpoint (`/api/interventions/:id/pdf`)
+- PDF includes GBD Energy SRL logo, client data, intervention details, GPS position, notes, and photo documentation
+- Role-based access control ensures technicians/companies can only download their own interventions
+- Frontend updated to support PDF download on both web and mobile platforms
+- Added `getToken()` and `getBaseUrl()` methods to API service
+
+**December 2025 - Web Intervention Detail Fix**:
+- Fixed API response handling in InterventionDetailScreen (response.success instead of response.data.success)
+
 **December 2025 - Intervention Persistence Fix**:
 - Fixed intervention persistence: `addIntervention` now async function that saves to server when `hasValidToken` is true
 - Backend response format standardized to `{success: true, data: intervention}` for proper frontend handling
