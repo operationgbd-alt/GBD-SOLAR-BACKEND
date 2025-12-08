@@ -16,13 +16,6 @@ export default ({ config }) => {
     
     android: {
       package: "com.operationgbd.solartech",
-      permissions: [
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ],
       config: {
         googleMaps: {
           apiKey: googleMapsApiKey
