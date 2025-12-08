@@ -144,34 +144,56 @@ export default function InterventionDetailScreen() {
     try {
       setGeneratingPdf(true);
       
-      const response: any = await api.post(
-        `/reports/intervention/${interventionId}?format=base64`,
-        { interventionData: intervention }
-      );
-
-      if (response.data.success && response.data.data) {
-        const base64Data = response.data.data;
-        const filename = response.data.filename || `Report_${intervention?.number || interventionId}.pdf`;
-        const fileUri = `${(FileSystem as any).documentDirectory}${filename}`;
-
-        await (FileSystem as any).writeAsStringAsync(fileUri, base64Data, {
-          encoding: (FileSystem as any).EncodingType.Base64,
+      const pdfUrl = `https://gbd-solar-backend-production.up.railway.app/api/interventions/${interventionId}/pdf`;
+      const filename = `Intervento_${intervention?.number || interventionId}.pdf`;
+      
+      if (Platform.OS === 'web') {
+        const token = await api.getToken();
+        const response = await fetch(pdfUrl, {
+          headers: { Authorization: `Bearer ${token}` }
         });
-
-        if (await Sharing.isAvailableAsync()) {
-          await Sharing.shareAsync(fileUri, {
-            mimeType: 'application/pdf',
-            dialogTitle: 'Condividi Report PDF',
-          });
-        } else {
-          Alert.alert('Successo', `PDF salvato: ${filename}`);
+        
+        if (!response.ok) {
+          throw new Error('Errore download PDF');
         }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        Alert.alert('Successo', 'PDF scaricato con successo!');
       } else {
-        Alert.alert('Errore', response.data.error || 'Impossibile generare il PDF');
+        const token = await api.getToken();
+        const downloadResult = await (FileSystem as any).downloadAsync(
+          pdfUrl,
+          `${(FileSystem as any).documentDirectory}${filename}`,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        if (downloadResult.status === 200) {
+          if (await Sharing.isAvailableAsync()) {
+            await Sharing.shareAsync(downloadResult.uri, {
+              mimeType: 'application/pdf',
+              dialogTitle: 'Condividi Report PDF',
+            });
+          } else {
+            Alert.alert('Successo', `PDF salvato: ${filename}`);
+          }
+        } else {
+          Alert.alert('Errore', 'Impossibile scaricare il PDF');
+        }
       }
     } catch (error: any) {
       console.error('Error generating PDF:', error);
-      Alert.alert('Errore', error.response?.data?.error || 'Errore durante la generazione del PDF');
+      Alert.alert('Errore', error.message || 'Errore durante la generazione del PDF');
     } finally {
       setGeneratingPdf(false);
     }

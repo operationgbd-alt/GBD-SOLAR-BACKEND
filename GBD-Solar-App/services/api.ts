@@ -76,6 +76,10 @@ export const api = {
     console.log('[API] Token set:', token ? 'YES' : 'NO');
   },
 
+  getToken: (): string | null => {
+    return authToken;
+  },
+
   setOnUnauthorized: (callback: () => void) => {
     onUnauthorizedCallback = callback;
   },
