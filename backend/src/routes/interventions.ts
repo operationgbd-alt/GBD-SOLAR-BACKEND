@@ -55,12 +55,37 @@ router.get('/:id', authenticateToken, async (req: AuthRequest, res) => {
     const result = await pool.query('SELECT * FROM interventions WHERE id = $1', [id]);
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Intervento non trovato' });
+      return res.status(404).json({ success: false, error: 'Intervento non trovato' });
     }
     
-    res.json(result.rows[0]);
+    const row = result.rows[0];
+    const intervention = {
+      id: String(row.id),
+      number: `INT-${new Date(row.created_at).getFullYear()}-${String(row.id).padStart(3, '0')}`,
+      clientName: row.client_name,
+      clientAddress: row.address,
+      clientCivicNumber: row.civic_number,
+      clientCity: row.city,
+      clientPhone: row.phone,
+      clientEmail: row.email,
+      category: row.type,
+      priority: row.priority,
+      description: row.description,
+      status: row.status,
+      technicianId: row.technician_id ? String(row.technician_id) : null,
+      companyId: row.company_id ? String(row.company_id) : null,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      scheduledDate: row.scheduled_date,
+      notes: row.notes,
+      latitude: row.latitude,
+      longitude: row.longitude,
+    };
+    
+    res.json({ success: true, data: intervention });
   } catch (error) {
-    res.status(500).json({ error: 'Errore nel recupero intervento' });
+    console.error('Errore recupero intervento:', error);
+    res.status(500).json({ success: false, error: 'Errore nel recupero intervento' });
   }
 });
 
