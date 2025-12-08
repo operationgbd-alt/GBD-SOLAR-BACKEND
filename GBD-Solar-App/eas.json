@@ -8,7 +8,8 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "API_URL": "https://gbd-solar-backend-production.up.railway.app/api"
+        "API_URL": "https://gbd-solar-backend-production.up.railway.app/api",
+        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
       }
     },
     "preview": {
@@ -17,13 +18,15 @@
         "buildType": "apk"
       },
       "env": {
-        "API_URL": "https://gbd-solar-backend-production.up.railway.app/api"
+        "API_URL": "https://gbd-solar-backend-production.up.railway.app/api",
+        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "API_URL": "https://gbd-solar-backend-production.up.railway.app/api"
+        "API_URL": "https://gbd-solar-backend-production.up.railway.app/api",
+        "EXPO_PUBLIC_GOOGLE_MAPS_API_KEY": "${EXPO_PUBLIC_GOOGLE_MAPS_API_KEY}"
       }
     }
   },
