@@ -6,6 +6,7 @@ export default ({ config }) => {
     name: "SolarTech",
     slug: "solartech",
     version: "1.0.0",
+    scheme: "solartech",
     orientation: "portrait",
     userInterfaceStyle: "automatic",
     
@@ -28,6 +29,16 @@ export default ({ config }) => {
     },
     
     plugins: [
+      [
+        "expo-build-properties",
+        {
+          android: {
+            minSdkVersion: 24,
+            compileSdkVersion: 34,
+            targetSdkVersion: 34,
+          },
+        },
+      ],
       "expo-secure-store",
       "expo-mail-composer",
       "expo-web-browser",
