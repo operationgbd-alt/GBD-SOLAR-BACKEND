@@ -115,12 +115,12 @@ export default function InterventionDetailScreen() {
             try {
               setActionLoading('delete');
               const response: any = await api.delete(`/interventions/${interventionId}`);
-              if (response.data.success) {
+              if (response.success) {
                 Alert.alert('Successo', 'Intervento eliminato con successo');
                 await refreshFromServer();
                 navigation.goBack();
               } else {
-                Alert.alert('Errore', response.data.error || 'Impossibile eliminare l\'intervento');
+                Alert.alert('Errore', response.error || 'Impossibile eliminare l\'intervento');
               }
             } catch (error: any) {
               console.error('Error deleting intervention:', error);
@@ -205,7 +205,7 @@ export default function InterventionDetailScreen() {
       const response: any = await api.patch(`/interventions/${interventionId}/status`, {
         status: newStatus,
       });
-      if (response.data.success) {
+      if (response.success) {
         await loadIntervention();
         await refreshFromServer();
       }
