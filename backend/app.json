@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "2093ba04-6879-4a5b-a58d-eeec5f32c14c"
+      }
+    },
+    "android": {
+      "package": "com.operationgbd.solartechbackend"
+    }
+  }
+}
