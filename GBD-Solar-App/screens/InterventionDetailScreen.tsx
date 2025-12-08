@@ -51,12 +51,18 @@ export default function InterventionDetailScreen() {
   const loadIntervention = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('[DETAIL] Loading intervention:', interventionId);
       const response: any = await api.get(`/interventions/${interventionId}`);
+      console.log('[DETAIL] Response:', JSON.stringify(response.data));
       if (response.data.success) {
         setIntervention(response.data.data);
+        console.log('[DETAIL] Intervention loaded successfully');
+      } else {
+        console.log('[DETAIL] Response not successful:', response.data);
       }
-    } catch (error) {
-      console.error('Error loading intervention:', error);
+    } catch (error: any) {
+      console.error('[DETAIL] Error loading intervention:', error);
+      console.error('[DETAIL] Error response:', error.response?.data);
       Alert.alert('Errore', 'Impossibile caricare i dettagli dell\'intervento');
     } finally {
       setLoading(false);
