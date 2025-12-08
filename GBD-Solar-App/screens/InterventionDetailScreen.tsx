@@ -31,7 +31,7 @@ export default function InterventionDetailScreen() {
   const navigation = useNavigation<any>();
   const { interventionId } = route.params as RouteParams;
   const { user } = useAuth();
-  const { refreshInterventions } = useApp();
+  const { refreshFromServer } = useApp();
   const { colors } = useTheme();
   
   const [intervention, setIntervention] = useState<any>(null);
@@ -51,7 +51,7 @@ export default function InterventionDetailScreen() {
   const loadIntervention = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get(`/interventions/${interventionId}`);
+      const response: any = await api.get(`/interventions/${interventionId}`);
       if (response.data.success) {
         setIntervention(response.data.data);
       }
@@ -109,10 +109,10 @@ export default function InterventionDetailScreen() {
           onPress: async () => {
             try {
               setActionLoading('delete');
-              const response = await api.delete(`/interventions/${interventionId}`);
+              const response: any = await api.delete(`/interventions/${interventionId}`);
               if (response.data.success) {
                 Alert.alert('Successo', 'Intervento eliminato con successo');
-                await refreshInterventions();
+                await refreshFromServer();
                 navigation.goBack();
               } else {
                 Alert.alert('Errore', response.data.error || 'Impossibile eliminare l\'intervento');
@@ -139,7 +139,7 @@ export default function InterventionDetailScreen() {
     try {
       setGeneratingPdf(true);
       
-      const response = await api.post(
+      const response: any = await api.post(
         `/reports/intervention/${interventionId}?format=base64`,
         { interventionData: intervention }
       );
@@ -147,10 +147,10 @@ export default function InterventionDetailScreen() {
       if (response.data.success && response.data.data) {
         const base64Data = response.data.data;
         const filename = response.data.filename || `Report_${intervention?.number || interventionId}.pdf`;
-        const fileUri = `${FileSystem.documentDirectory}${filename}`;
+        const fileUri = `${(FileSystem as any).documentDirectory}${filename}`;
 
-        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-          encoding: FileSystem.EncodingType.Base64,
+        await (FileSystem as any).writeAsStringAsync(fileUri, base64Data, {
+          encoding: (FileSystem as any).EncodingType.Base64,
         });
 
         if (await Sharing.isAvailableAsync()) {
@@ -175,12 +175,12 @@ export default function InterventionDetailScreen() {
   const handleUpdateStatus = async (newStatus: string) => {
     try {
       setActionLoading('status');
-      const response = await api.patch(`/interventions/${interventionId}/status`, {
+      const response: any = await api.patch(`/interventions/${interventionId}/status`, {
         status: newStatus,
       });
       if (response.data.success) {
         await loadIntervention();
-        await refreshInterventions();
+        await refreshFromServer();
       }
     } catch (error) {
       console.error('Error updating status:', error);
@@ -223,15 +223,15 @@ export default function InterventionDetailScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+      <View style={[styles.loadingContainer, { backgroundColor: colors.backgroundDefault }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   if (!intervention) {
     return (
-      <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
+      <View style={[styles.errorContainer, { backgroundColor: colors.backgroundDefault }]}>
         <Feather name="alert-circle" size={48} color={colors.textSecondary} />
         <Text style={[styles.errorText, { color: colors.textSecondary }]}>
           Intervento non trovato
@@ -241,7 +241,7 @@ export default function InterventionDetailScreen() {
   }
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.backgroundDefault }]}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <Text style={[styles.interventionNumber, { color: colors.text }]}>
@@ -258,31 +258,31 @@ export default function InterventionDetailScreen() {
         </View>
       </View>
 
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
+      <View style={[styles.section, { backgroundColor: colors.backgroundSecondary }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Cliente</Text>
         <Text style={[styles.clientName, { color: colors.text }]}>{intervention.clientName}</Text>
         
         <TouchableOpacity style={styles.infoRow} onPress={() => handleCall(intervention.clientPhone)}>
-          <Feather name="phone" size={18} color={Colors.primary} />
-          <Text style={[styles.infoText, { color: Colors.primary }]}>{intervention.clientPhone}</Text>
+          <Feather name="phone" size={18} color={colors.primary} />
+          <Text style={[styles.infoText, { color: colors.primary }]}>{intervention.clientPhone}</Text>
         </TouchableOpacity>
 
         {intervention.clientEmail ? (
           <TouchableOpacity style={styles.infoRow} onPress={() => handleEmail(intervention.clientEmail)}>
-            <Feather name="mail" size={18} color={Colors.primary} />
-            <Text style={[styles.infoText, { color: Colors.primary }]}>{intervention.clientEmail}</Text>
+            <Feather name="mail" size={18} color={colors.primary} />
+            <Text style={[styles.infoText, { color: colors.primary }]}>{intervention.clientEmail}</Text>
           </TouchableOpacity>
         ) : null}
 
         <TouchableOpacity style={styles.infoRow} onPress={handleNavigate}>
-          <Feather name="map-pin" size={18} color={Colors.primary} />
-          <Text style={[styles.infoText, { color: Colors.primary }]}>
+          <Feather name="map-pin" size={18} color={colors.primary} />
+          <Text style={[styles.infoText, { color: colors.primary }]}>
             {`${intervention.clientAddress} ${intervention.clientCivicNumber || ''}, ${intervention.clientCity || ''}`}
           </Text>
         </TouchableOpacity>
       </View>
 
-      <View style={[styles.section, { backgroundColor: colors.card }]}>
+      <View style={[styles.section, { backgroundColor: colors.backgroundSecondary }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Dettagli Intervento</Text>
         <Text style={[styles.category, { color: colors.textSecondary }]}>
           Categoria: {intervention.category}
@@ -295,7 +295,7 @@ export default function InterventionDetailScreen() {
       </View>
 
       {intervention.technician ? (
-        <View style={[styles.section, { backgroundColor: colors.card }]}>
+        <View style={[styles.section, { backgroundColor: colors.backgroundSecondary }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Tecnico Assegnato</Text>
           <Text style={[styles.technicianName, { color: colors.text }]}>
             {intervention.technician.name}
@@ -305,8 +305,8 @@ export default function InterventionDetailScreen() {
               style={styles.infoRow} 
               onPress={() => handleCall(intervention.technician.phone)}
             >
-              <Feather name="phone" size={18} color={Colors.primary} />
-              <Text style={[styles.infoText, { color: Colors.primary }]}>
+              <Feather name="phone" size={18} color={colors.primary} />
+              <Text style={[styles.infoText, { color: colors.primary }]}>
                 {intervention.technician.phone}
               </Text>
             </TouchableOpacity>
