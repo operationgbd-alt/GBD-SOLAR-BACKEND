@@ -42,6 +42,7 @@ export default ({ config }) => {
     },
     
     plugins: [
+      "./plugins/withAndroidManifestFix",
       [
         "expo-build-properties",
         {
