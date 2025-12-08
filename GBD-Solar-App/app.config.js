@@ -1,3 +1,5 @@
+const googleMapsApiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
+
 export default ({ config }) => {
   return {
     ...config,
@@ -20,7 +22,12 @@ export default ({ config }) => {
         "CAMERA",
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE"
-      ]
+      ],
+      config: {
+        googleMaps: {
+          apiKey: googleMapsApiKey
+        }
+      }
     },
     
     web: {
