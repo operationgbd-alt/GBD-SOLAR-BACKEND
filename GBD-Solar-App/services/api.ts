@@ -1,7 +1,7 @@
-// URL del backend Railway
-const API_BASE_URL = 'https://gbd-solar-backend-production.up.railway.app/api';
+import Constants from 'expo-constants';
 
-console.log('[API] Base URL:', API_BASE_URL);
+// URL del backend - usa la configurazione Expo o fallback
+const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'https://gbd-solar-backend-production.up.railway.app/api';
 
 // Token e callback memorizzati
 let authToken: string | null = null;
@@ -18,7 +18,6 @@ async function apiRequest<T>(
   };
 
   const url = `${API_BASE_URL}${endpoint}`;
-  console.log('[API] Request:', options.method || 'GET', url);
 
   try {
     const response = await fetch(url, {
@@ -28,7 +27,6 @@ async function apiRequest<T>(
 
     // Gestione 401 - token scaduto
     if (response.status === 401 && onUnauthorizedCallback) {
-      console.log('[API] 401 Unauthorized - calling logout');
       onUnauthorizedCallback();
       throw new Error('Sessione scaduta');
     }
@@ -41,7 +39,6 @@ async function apiRequest<T>(
 
     return data;
   } catch (error) {
-    console.error('[API] Error:', error);
     throw error;
   }
 }
@@ -73,7 +70,6 @@ export const api = {
   // Token management
   setToken: (token: string | null) => {
     authToken = token;
-    console.log('[API] Token set:', token ? 'YES' : 'NO');
   },
 
   getToken: (): string | null => {
@@ -98,7 +94,6 @@ export const api = {
       });
       
       const data = await response.json();
-      console.log('[API] Login response:', JSON.stringify(data));
       
       if (!response.ok) {
         return { success: false, error: data.error || 'Login fallito', data: null };
@@ -106,7 +101,6 @@ export const api = {
       
       return data;
     } catch (error: any) {
-      console.error('[API] Login error:', error);
       return { success: false, error: error.message || 'Errore di connessione', data: null };
     }
   },

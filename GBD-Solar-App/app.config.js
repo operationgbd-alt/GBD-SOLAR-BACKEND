@@ -33,7 +33,7 @@ export default ({ config }) => {
         "expo-build-properties",
         {
           android: {
-            minSdkVersion: 24,
+            minSdkVersion: 26,
             compileSdkVersion: 35,
             targetSdkVersion: 35,
           },
