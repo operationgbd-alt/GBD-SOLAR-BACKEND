@@ -250,7 +250,7 @@ router.get('/:id/pdf', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { id } = req.params;
     
-    const result = await pool.query(`
+    let query = `
       SELECT i.*, 
              u.name as technician_name,
              c.name as company_name
@@ -258,10 +258,22 @@ router.get('/:id/pdf', authenticateToken, async (req: AuthRequest, res) => {
       LEFT JOIN users u ON i.technician_id = u.id
       LEFT JOIN companies c ON i.company_id = c.id
       WHERE i.id = $1
-    `, [id]);
+    `;
+    
+    const params: any[] = [id];
+    
+    if (req.user?.role === 'tecnico') {
+      query += ' AND i.technician_id = $2';
+      params.push(req.user.id);
+    } else if (req.user?.role === 'ditta') {
+      query += ' AND i.company_id = $2';
+      params.push(req.user.companyId);
+    }
+    
+    const result = await pool.query(query, params);
     
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Intervento non trovato' });
+      return res.status(403).json({ error: 'Accesso non autorizzato a questo intervento' });
     }
     
     const intervention = result.rows[0];

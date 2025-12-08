@@ -80,6 +80,10 @@ export const api = {
     return authToken;
   },
 
+  getBaseUrl: (): string => {
+    return API_BASE_URL;
+  },
+
   setOnUnauthorized: (callback: () => void) => {
     onUnauthorizedCallback = callback;
   },
