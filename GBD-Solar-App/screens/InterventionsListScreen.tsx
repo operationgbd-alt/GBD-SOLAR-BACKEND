@@ -251,6 +251,7 @@ export default function InterventionsListScreen({ navigation }: Props) {
       if (selectionMode) {
         toggleSelection(item.id);
       } else {
+        console.log('[LIST] Navigating to detail, item.id:', item.id, 'typeof:', typeof item.id);
         navigation.navigate('InterventionDetail', { interventionId: item.id });
       }
     };
