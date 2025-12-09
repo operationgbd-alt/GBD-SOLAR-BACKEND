@@ -223,7 +223,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.log('[REFRESH] API failed, keeping local data');
       }
 
+      console.log('[REFRESH] Fetching companies...');
       const companiesResponse = await api.getCompanies();
+      console.log('[REFRESH] Companies response:', JSON.stringify(companiesResponse));
       if (companiesResponse.success && companiesResponse.data) {
         const serverCompanies: Company[] = companiesResponse.data.map((c: any) => ({
           id: String(c.id),
@@ -236,9 +238,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }));
         console.log('[REFRESH] Loaded', serverCompanies.length, 'companies from server');
         setCompaniesData(serverCompanies);
+      } else {
+        console.log('[REFRESH] Companies failed - success:', companiesResponse.success);
       }
 
+      console.log('[REFRESH] Fetching users...');
       const usersResponse = await api.getUsers();
+      console.log('[REFRESH] Users response:', JSON.stringify(usersResponse));
       if (usersResponse.success && usersResponse.data) {
         const serverUsers: User[] = usersResponse.data.map((u: any) => ({
           id: String(u.id),
@@ -253,6 +259,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }));
         console.log('[REFRESH] Loaded', serverUsers.length, 'users from server');
         setUsersData(serverUsers);
+      } else {
+        console.log('[REFRESH] Users failed - success:', usersResponse.success);
       }
     } catch (error) {
       console.error('[REFRESH] Error:', error);

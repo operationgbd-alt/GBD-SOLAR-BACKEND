@@ -107,7 +107,11 @@ export const api = {
 
   // Users
   getUsers: async () => {
-    return apiRequest<{ success: boolean; data: any[] }>('/users');
+    const response = await apiRequest<any>('/users');
+    if (Array.isArray(response)) {
+      return { success: true, data: response };
+    }
+    return response;
   },
 
   createUser: async (userData: any) => {
@@ -132,7 +136,11 @@ export const api = {
 
   // Companies
   getCompanies: async () => {
-    return apiRequest<{ success: boolean; data: any[] }>('/companies');
+    const response = await apiRequest<any>('/companies');
+    if (Array.isArray(response)) {
+      return { success: true, data: response };
+    }
+    return response;
   },
 
   createCompany: async (companyData: any) => {
