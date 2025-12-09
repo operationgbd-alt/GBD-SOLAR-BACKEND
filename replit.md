@@ -137,6 +137,17 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**December 2025 - Professional PDF with Email Integration**:
+- New HTML template-based PDF generation using Puppeteer for professional layout
+- PDF includes: GBD Energy logo, styled sections, status badges, priority indicators, GPS links, photo gallery
+- SendGrid integration for automatic email delivery of reports
+- New endpoints: `POST /interventions/:id/send-report`, `GET /interventions/:id/download-report`
+- Role-based access: only MASTER and DITTA can generate/send reports
+- Email sent to operation.gbd@gruppo-phoenix.com with PDF attachment
+- Frontend: "Invia Email" button added to InterventionDetailScreen
+- Services: `pdfService.ts` (Puppeteer), `emailService.ts` (SendGrid)
+- Template: `backend/src/templates/intervention-report.html`
+
 **December 2025 - PDF Generation Enhancement**:
 - Added professional PDF report generation endpoint (`/api/interventions/:id/pdf`)
 - PDF includes GBD Energy SRL logo, client data, intervention details, GPS position, notes, and photo documentation

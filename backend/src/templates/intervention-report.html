@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Report Intervento {{number}}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 12px;
+      color: #333;
+      line-height: 1.5;
+      background: #fff;
+    }
+    
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm 20mm;
+      margin: 0 auto;
+      background: white;
+    }
+    
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 3px solid #1B8C3A;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .logo-section {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .logo {
+      width: 80px;
+      height: auto;
+    }
+    
+    .company-info {
+      text-align: left;
+    }
+    
+    .company-name {
+      font-size: 22px;
+      font-weight: bold;
+      color: #1B8C3A;
+    }
+    
+    .company-subtitle {
+      font-size: 10px;
+      color: #666;
+      margin-top: 2px;
+    }
+    
+    .report-info {
+      text-align: right;
+    }
+    
+    .report-number {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1B8C3A;
+    }
+    
+    .report-date {
+      font-size: 10px;
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-top: 8px;
+    }
+    
+    .status-pending { background: #FEF3C7; color: #92400E; }
+    .status-assigned { background: #DBEAFE; color: #1E40AF; }
+    .status-in_progress { background: #E0E7FF; color: #3730A3; }
+    .status-completed { background: #D1FAE5; color: #065F46; }
+    .status-cancelled { background: #FEE2E2; color: #991B1B; }
+    
+    .section {
+      margin-bottom: 20px;
+    }
+    
+    .section-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: #1B8C3A;
+      border-bottom: 2px solid #E5E7EB;
+      padding-bottom: 5px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 30px;
+    }
+    
+    .info-row {
+      display: flex;
+      padding: 6px 0;
+      border-bottom: 1px solid #F3F4F6;
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #6B7280;
+      min-width: 120px;
+      font-size: 11px;
+    }
+    
+    .info-value {
+      color: #1F2937;
+      font-size: 11px;
+    }
+    
+    .full-width {
+      grid-column: 1 / -1;
+    }
+    
+    .description-box {
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    
+    .description-text {
+      font-size: 11px;
+      color: #374151;
+      white-space: pre-wrap;
+    }
+    
+    .priority-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+    
+    .priority-low { background: #D1FAE5; color: #065F46; }
+    .priority-medium { background: #FEF3C7; color: #92400E; }
+    .priority-high { background: #FED7AA; color: #C2410C; }
+    .priority-urgent { background: #FEE2E2; color: #991B1B; }
+    
+    .gps-section {
+      background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    
+    .gps-link {
+      color: #1D4ED8;
+      text-decoration: none;
+      font-size: 10px;
+    }
+    
+    .photos-section {
+      page-break-before: always;
+      padding-top: 20px;
+    }
+    
+    .photos-title {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1B8C3A;
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 3px solid #1B8C3A;
+    }
+    
+    .photos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    
+    .photo-item {
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #F9FAFB;
+    }
+    
+    .photo-img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .photo-caption {
+      padding: 8px;
+      text-align: center;
+      font-size: 10px;
+      color: #6B7280;
+      background: #F3F4F6;
+    }
+    
+    .footer {
+      position: fixed;
+      bottom: 10mm;
+      left: 20mm;
+      right: 20mm;
+      text-align: center;
+      font-size: 9px;
+      color: #9CA3AF;
+      border-top: 1px solid #E5E7EB;
+      padding-top: 10px;
+    }
+    
+    .notes-box {
+      background: #FFFBEB;
+      border: 1px solid #FCD34D;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    
+    .timeline-section {
+      background: #F0FDF4;
+      border: 1px solid #86EFAC;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 0;
+    }
+    
+    .timeline-dot {
+      width: 10px;
+      height: 10px;
+      background: #1B8C3A;
+      border-radius: 50%;
+    }
+    
+    .timeline-text {
+      font-size: 11px;
+      color: #374151;
+    }
+    
+    @media print {
+      .page {
+        padding: 10mm 15mm;
+      }
+      .photos-section {
+        page-break-before: always;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div class="logo-section">
+        {{#if logoBase64}}
+        <img src="data:image/png;base64,{{logoBase64}}" alt="GBD Energy" class="logo">
+        {{/if}}
+        <div class="company-info">
+          <div class="company-name">GBD Energy SRL</div>
+          <div class="company-subtitle">Soluzioni Fotovoltaiche</div>
+        </div>
+      </div>
+      <div class="report-info">
+        <div class="report-number">{{number}}</div>
+        <div class="report-date">Generato il {{generatedDate}}</div>
+        <div class="status-badge status-{{status}}">{{statusLabel}}</div>
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Dati Cliente</div>
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">Nome Cliente</span>
+          <span class="info-value">{{clientName}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Telefono</span>
+          <span class="info-value">{{phone}}</span>
+        </div>
+        <div class="info-row full-width">
+          <span class="info-label">Indirizzo</span>
+          <span class="info-value">{{address}}{{#if civicNumber}}, {{civicNumber}}{{/if}}{{#if city}} - {{city}}{{/if}}</span>
+        </div>
+        {{#if email}}
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{email}}</span>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    
+    <div class="section">
+      <div class="section-title">Dettagli Intervento</div>
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="info-label">Tipo</span>
+          <span class="info-value">{{typeLabel}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Priorità</span>
+          <span class="info-value"><span class="priority-badge priority-{{priority}}">{{priorityLabel}}</span></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Ditta Assegnata</span>
+          <span class="info-value">{{companyName}}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Tecnico</span>
+          <span class="info-value">{{technicianName}}</span>
+        </div>
+        {{#if scheduledDate}}
+        <div class="info-row full-width">
+          <span class="info-label">Data Programmata</span>
+          <span class="info-value">{{scheduledDate}}</span>
+        </div>
+        {{/if}}
+      </div>
+      
+      {{#if description}}
+      <div class="description-box">
+        <div class="info-label" style="margin-bottom: 5px;">Descrizione</div>
+        <div class="description-text">{{description}}</div>
+      </div>
+      {{/if}}
+    </div>
+    
+    {{#if hasGPS}}
+    <div class="section">
+      <div class="section-title">Posizione GPS</div>
+      <div class="gps-section">
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="info-label">Latitudine</span>
+            <span class="info-value">{{latitude}}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Longitudine</span>
+            <span class="info-value">{{longitude}}</span>
+          </div>
+        </div>
+        <div style="margin-top: 10px;">
+          <a href="https://maps.google.com/?q={{latitude}},{{longitude}}" class="gps-link">📍 Apri in Google Maps</a>
+        </div>
+      </div>
+    </div>
+    {{/if}}
+    
+    {{#if notes}}
+    <div class="section">
+      <div class="section-title">Note</div>
+      <div class="notes-box">
+        <div class="description-text">{{notes}}</div>
+      </div>
+    </div>
+    {{/if}}
+    
+    {{#if hasTimeline}}
+    <div class="section">
+      <div class="section-title">Timeline Intervento</div>
+      <div class="timeline-section">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-text"><strong>Creato:</strong> {{createdAt}}</div>
+        </div>
+        {{#if startedAt}}
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background: #3B82F6;"></div>
+          <div class="timeline-text"><strong>Iniziato:</strong> {{startedAt}}</div>
+        </div>
+        {{/if}}
+        {{#if completedAt}}
+        <div class="timeline-item">
+          <div class="timeline-dot" style="background: #10B981;"></div>
+          <div class="timeline-text"><strong>Completato:</strong> {{completedAt}}</div>
+        </div>
+        {{/if}}
+      </div>
+    </div>
+    {{/if}}
+    
+    <div class="footer">
+      GBD Energy SRL - Report Intervento {{number}} - Pagina 1
+    </div>
+  </div>
+  
+  {{#if hasPhotos}}
+  <div class="page photos-section">
+    <div class="photos-title">📷 Documentazione Fotografica</div>
+    <div class="photos-grid">
+      {{#each photos}}
+      <div class="photo-item">
+        <img src="{{this.src}}" alt="Foto {{this.index}}" class="photo-img">
+        <div class="photo-caption">Foto {{this.index}}</div>
+      </div>
+      {{/each}}
+    </div>
+    
+    <div class="footer">
+      GBD Energy SRL - Report Intervento {{../number}} - Documentazione Fotografica
+    </div>
+  </div>
+  {{/if}}
+</body>
+</html>

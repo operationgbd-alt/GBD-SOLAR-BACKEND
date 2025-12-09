@@ -38,6 +38,7 @@ export default function InterventionDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [sendingReport, setSendingReport] = useState(false);
 
   // CORREZIONE CRITICA: Normalizza il ruolo in MAIUSCOLO
   const userRole = user?.role?.toUpperCase();
@@ -199,6 +200,43 @@ export default function InterventionDetailScreen() {
     }
   };
 
+  const handleSendReport = async () => {
+    if (!canGeneratePdf) {
+      Alert.alert('Accesso Negato', 'Solo MASTER e DITTA possono inviare report');
+      return;
+    }
+
+    Alert.alert(
+      'Conferma Invio',
+      'Vuoi generare e inviare il report PDF via email a operation.gbd@gruppo-phoenix.com?',
+      [
+        { text: 'Annulla', style: 'cancel' },
+        {
+          text: 'Invia',
+          onPress: async () => {
+            try {
+              setSendingReport(true);
+              const response = await api.sendReport(interventionId);
+              if (response.success) {
+                Alert.alert(
+                  'Successo',
+                  'Report inviato con successo a operation.gbd@gruppo-phoenix.com'
+                );
+              } else {
+                Alert.alert('Errore', 'Impossibile inviare il report');
+              }
+            } catch (error: any) {
+              console.error('Error sending report:', error);
+              Alert.alert('Errore', error.message || 'Errore durante l\'invio del report');
+            } finally {
+              setSendingReport(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleUpdateStatus = async (newStatus: string) => {
     try {
       setActionLoading('status');
@@ -353,7 +391,24 @@ export default function InterventionDetailScreen() {
             ) : (
               <>
                 <Feather name="file-text" size={20} color="#fff" />
-                <Text style={styles.actionButtonText}>Genera PDF</Text>
+                <Text style={styles.actionButtonText}>Scarica PDF</Text>
+              </>
+            )}
+          </TouchableOpacity>
+        ) : null}
+
+        {canGeneratePdf ? (
+          <TouchableOpacity
+            style={[styles.actionButton, styles.emailButton]}
+            onPress={handleSendReport}
+            disabled={sendingReport}
+          >
+            {sendingReport ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <>
+                <Feather name="send" size={20} color="#fff" />
+                <Text style={styles.actionButtonText}>Invia Email</Text>
               </>
             )}
           </TouchableOpacity>
@@ -488,6 +543,9 @@ const styles = StyleSheet.create({
   },
   pdfButton: {
     backgroundColor: '#FF6B00',
+  },
+  emailButton: {
+    backgroundColor: '#1B8C3A',
   },
   deleteButton: {
     backgroundColor: '#F44336',

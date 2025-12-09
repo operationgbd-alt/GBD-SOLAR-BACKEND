@@ -241,6 +241,25 @@ export const api = {
     return apiRequest<{ success: boolean; data: { pdf: string } }>(`/reports/intervention/${interventionId}`);
   },
 
+  sendReport: async (interventionId: string) => {
+    return apiRequest<{ success: boolean; message: string; pdfSize?: number }>(`/interventions/${interventionId}/send-report`, {
+      method: 'POST',
+    });
+  },
+
+  downloadReport: async (interventionId: string) => {
+    const token = authToken;
+    const response = await fetch(`${API_BASE_URL}/interventions/${interventionId}/download-report`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Errore download report');
+    }
+    return response.blob();
+  },
+
   // Push Tokens
   registerPushToken: async (token: string) => {
     return apiRequest<{ success: boolean }>('/push-tokens/register', {

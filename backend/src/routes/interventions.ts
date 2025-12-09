@@ -6,6 +6,8 @@ import path from 'path';
 import fs from 'fs';
 import https from 'https';
 import http from 'http';
+import { pdfService } from '../services/pdfService';
+import { emailService } from '../services/emailService';
 
 const router = Router();
 
@@ -472,6 +474,181 @@ router.get('/:id/pdf', authenticateToken, async (req: AuthRequest, res) => {
   } catch (error) {
     console.error('Errore generazione PDF:', error);
     res.status(500).json({ error: 'Errore generazione PDF' });
+  }
+});
+
+router.post('/:id/send-report', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const userRole = req.user?.role?.toLowerCase();
+    if (userRole !== 'master' && userRole !== 'ditta') {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Solo MASTER e DITTA possono inviare report' 
+      });
+    }
+    
+    const { id } = req.params;
+    
+    let query = `
+      SELECT i.*, 
+             u.name as technician_name,
+             c.name as company_name
+      FROM interventions i
+      LEFT JOIN users u ON i.technician_id = u.id
+      LEFT JOIN companies c ON i.company_id = c.id
+      WHERE i.id = $1
+    `;
+    
+    const params: any[] = [id];
+    
+    if (req.user?.role === 'tecnico') {
+      query += ' AND i.technician_id = $2';
+      params.push(req.user.id);
+    } else if (req.user?.role === 'ditta') {
+      query += ' AND i.company_id = $2';
+      params.push(req.user.companyId);
+    }
+    
+    const result = await pool.query(query, params);
+    
+    if (result.rows.length === 0) {
+      return res.status(403).json({ success: false, error: 'Accesso non autorizzato a questo intervento' });
+    }
+    
+    const row = result.rows[0];
+    const interventionNumber = `INT-${new Date(row.created_at).getFullYear()}-${String(row.id).padStart(3, '0')}`;
+    
+    const interventionData = {
+      id: String(row.id),
+      number: interventionNumber,
+      clientName: row.client_name,
+      address: row.address,
+      civicNumber: row.civic_number,
+      city: row.city,
+      phone: row.phone,
+      email: row.email,
+      type: row.type,
+      priority: row.priority,
+      status: row.status,
+      description: row.description,
+      notes: row.notes,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      companyName: row.company_name,
+      technicianName: row.technician_name,
+      scheduledDate: row.scheduled_date,
+      createdAt: row.created_at,
+      startedAt: row.started_at,
+      completedAt: row.completed_at,
+      photos: row.photos || [],
+    };
+    
+    console.log('[REPORT] Generazione PDF per intervento:', interventionNumber);
+    const pdfBuffer = await pdfService.generatePDF(interventionData);
+    console.log('[REPORT] PDF generato, dimensione:', pdfBuffer.length, 'bytes');
+    
+    console.log('[REPORT] Invio email a operation.gbd@gruppo-phoenix.com');
+    const emailResult = await emailService.sendInterventionReport(
+      pdfBuffer,
+      interventionNumber,
+      row.client_name,
+      row.status
+    );
+    
+    if (emailResult.success) {
+      console.log('[REPORT] Email inviata con successo');
+      res.json({ 
+        success: true, 
+        message: 'Report generato e inviato via email a operation.gbd@gruppo-phoenix.com',
+        pdfSize: pdfBuffer.length
+      });
+    } else {
+      console.error('[REPORT] Errore invio email:', emailResult.error);
+      res.status(500).json({ 
+        success: false, 
+        error: emailResult.error || 'Errore invio email'
+      });
+    }
+    
+  } catch (error) {
+    console.error('[REPORT] Errore generazione report:', error);
+    res.status(500).json({ success: false, error: 'Errore generazione report' });
+  }
+});
+
+router.get('/:id/download-report', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const userRole = req.user?.role?.toLowerCase();
+    if (userRole !== 'master' && userRole !== 'ditta') {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Solo MASTER e DITTA possono scaricare report' 
+      });
+    }
+    
+    const { id } = req.params;
+    
+    let query = `
+      SELECT i.*, 
+             u.name as technician_name,
+             c.name as company_name
+      FROM interventions i
+      LEFT JOIN users u ON i.technician_id = u.id
+      LEFT JOIN companies c ON i.company_id = c.id
+      WHERE i.id = $1
+    `;
+    
+    const params: any[] = [id];
+    
+    if (userRole === 'ditta') {
+      query += ' AND i.company_id = $2';
+      params.push(req.user?.companyId);
+    }
+    
+    const result = await pool.query(query, params);
+    
+    if (result.rows.length === 0) {
+      return res.status(403).json({ success: false, error: 'Accesso non autorizzato' });
+    }
+    
+    const row = result.rows[0];
+    const interventionNumber = `INT-${new Date(row.created_at).getFullYear()}-${String(row.id).padStart(3, '0')}`;
+    
+    const interventionData = {
+      id: String(row.id),
+      number: interventionNumber,
+      clientName: row.client_name,
+      address: row.address,
+      civicNumber: row.civic_number,
+      city: row.city,
+      phone: row.phone,
+      email: row.email,
+      type: row.type,
+      priority: row.priority,
+      status: row.status,
+      description: row.description,
+      notes: row.notes,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      companyName: row.company_name,
+      technicianName: row.technician_name,
+      scheduledDate: row.scheduled_date,
+      createdAt: row.created_at,
+      startedAt: row.started_at,
+      completedAt: row.completed_at,
+      photos: row.photos || [],
+    };
+    
+    const pdfBuffer = await pdfService.generatePDF(interventionData);
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Report_${interventionNumber}.pdf`);
+    res.setHeader('Content-Length', pdfBuffer.length);
+    res.send(pdfBuffer);
+    
+  } catch (error) {
+    console.error('[REPORT] Errore download report:', error);
+    res.status(500).json({ success: false, error: 'Errore generazione report' });
   }
 });
 
