@@ -137,6 +137,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**December 2025 - Navigation & Layout Fix**:
+- Fixed back button navigation in all stack navigators (ProfileStackNavigator, InterventionsStackNavigator, DashboardStackNavigator)
+- Changed from `navigation.reset()` to `navigation.goBack()` for proper back navigation behavior
+- Added minimum touch target size (44x44px) for mobile accessibility compliance
+- Increased back button icon size from 24 to 28 for better visibility on mobile
+- Fixed layout padding issues in `useScreenInsets.ts` - removed dependency on `useHeaderHeight()` and `useBottomTabBarHeight()` that caused double padding and content being cut off
+- Now uses simple safe area insets with fixed padding values for consistent layout
+
 **December 2025 - Shared Label Helpers System**:
 - Created `backend/src/services/labelHelpers.ts` with centralized mappings for status/priority/type labels
 - Comprehensive Italian/English enum coverage: nuovo, assegnato, in_corso, completato, sospeso, verifica_programmata, richiamo, post_installazione, etc.
