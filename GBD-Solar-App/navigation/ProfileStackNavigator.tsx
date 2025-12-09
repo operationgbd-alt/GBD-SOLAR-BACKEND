@@ -32,29 +32,21 @@ function ContextAwareBackButton({ routeName }: { routeName: keyof ProfileStackPa
   const origin = (route.params as any)?.origin;
 
   const handleBack = () => {
-    if (origin === 'Dashboard') {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Profile' }],
-      });
-      
-      setTimeout(() => {
-        const tabNav = navigation.getParent();
-        if (tabNav) {
-          tabNav.navigate('DashboardTab');
-        }
-      }, 10);
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else if (origin === 'Dashboard') {
+      const tabNav = navigation.getParent();
+      if (tabNav) {
+        tabNav.navigate('DashboardTab');
+      }
     } else {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Profile' }],
-      });
+      navigation.navigate('Profile');
     }
   };
 
   return (
-    <Pressable onPress={handleBack} style={{ padding: Spacing.xs }}>
-      <Feather name="chevron-left" size={24} color={theme.text} />
+    <Pressable onPress={handleBack} style={{ padding: Spacing.xs, minWidth: 44, minHeight: 44, justifyContent: 'center' }}>
+      <Feather name="chevron-left" size={28} color={theme.text} />
     </Pressable>
   );
 }
@@ -64,15 +56,19 @@ function ProfileBackButton() {
   const navigation = useNavigation<any>();
 
   const handleBack = () => {
-    const tabNav = navigation.getParent();
-    if (tabNav) {
-      tabNav.navigate('DashboardTab');
+    if (navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      const tabNav = navigation.getParent();
+      if (tabNav) {
+        tabNav.navigate('DashboardTab');
+      }
     }
   };
 
   return (
-    <Pressable onPress={handleBack} style={{ padding: Spacing.xs }}>
-      <Feather name="chevron-left" size={24} color={theme.text} />
+    <Pressable onPress={handleBack} style={{ padding: Spacing.xs, minWidth: 44, minHeight: 44, justifyContent: 'center' }}>
+      <Feather name="chevron-left" size={28} color={theme.text} />
     </Pressable>
   );
 }
