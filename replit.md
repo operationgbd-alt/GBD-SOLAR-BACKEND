@@ -137,6 +137,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**December 2025 - Shared Label Helpers System**:
+- Created `backend/src/services/labelHelpers.ts` with centralized mappings for status/priority/type labels
+- Comprehensive Italian/English enum coverage: nuovo, assegnato, in_corso, completato, sospeso, verifica_programmata, richiamo, post_installazione, etc.
+- Helper functions with console.warn telemetry for unmapped values: getStatusLabel, getStatusClass, getPriorityLabel, getPriorityClass, getTypeLabel
+- Both pdfService.ts and emailService.ts now use shared helpers for consistent label normalization
+- CSS class mapping ensures correct badge colors in PDF: pending, assigned, in_progress, completed, cancelled
+
 **December 2025 - Professional PDF with Email Integration**:
 - New HTML template-based PDF generation using Puppeteer for professional layout
 - PDF includes: GBD Energy logo, styled sections, status badges, priority indicators, GPS links, photo gallery
