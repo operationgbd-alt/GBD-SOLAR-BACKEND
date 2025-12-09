@@ -140,7 +140,7 @@ export default function InterventionsListScreen({ navigation }: Props) {
             for (const id of selectedIds) {
               try {
                 console.log('[DELETE] Attempting to delete intervention:', id);
-                const response = await api.deleteIntervention(id);
+                const response = await api.deleteIntervention(id) as { success: boolean; error?: string };
                 console.log('[DELETE] Response:', response.success, response.error);
                 
                 if (response.success) {
@@ -325,18 +325,21 @@ export default function InterventionsListScreen({ navigation }: Props) {
             </ThemedText>
           </View>
 
-          {item.appointment ? (
-            <View style={styles.appointmentInfo}>
-              <Feather name="clock" size={12} color={theme.textSecondary} />
-              <ThemedText type="caption" style={{ color: theme.textSecondary, marginLeft: 4 }}>
-                {formatDate(item.appointment.date)} {formatTime(item.appointment.date)}
+          <View style={styles.footerRight}>
+            {item.appointment ? (
+              <View style={styles.appointmentInfo}>
+                <Feather name="clock" size={12} color={theme.textSecondary} />
+                <ThemedText type="caption" style={{ color: theme.textSecondary, marginLeft: 4 }}>
+                  {formatDate(item.appointment.date)} {formatTime(item.appointment.date)}
+                </ThemedText>
+              </View>
+            ) : (
+              <ThemedText type="caption" style={{ color: theme.textTertiary }}>
+                Assegnato {formatDate(item.assignedAt)}
               </ThemedText>
-            </View>
-          ) : (
-            <ThemedText type="caption" style={{ color: theme.textTertiary }}>
-              Assegnato {formatDate(item.assignedAt)}
-            </ThemedText>
-          )}
+            )}
+            <Feather name="chevron-right" size={20} color={theme.textTertiary} style={{ marginLeft: Spacing.sm }} />
+          </View>
         </View>
       </Card>
       </Pressable>
@@ -444,7 +447,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.sm,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -520,6 +523,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   appointmentInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  footerRight: {
     flexDirection: 'row',
     alignItems: 'center',
   },
