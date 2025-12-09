@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import https from 'https';
 import http from 'http';
+import { execSync } from 'child_process';
 import {
   getStatusLabel,
   getStatusClass,
@@ -14,6 +15,33 @@ import {
 
 const TEMPLATE_PATH = path.join(__dirname, '../templates/intervention-report.html');
 const LOGO_PATH = path.join(__dirname, '../../assets/logo-gbd.png');
+
+function findChromiumPath(): string | undefined {
+  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  }
+  try {
+    const result = execSync('which chromium || which chromium-browser || which google-chrome', { encoding: 'utf-8' });
+    const chromePath = result.trim().split('\n')[0];
+    if (chromePath && fs.existsSync(chromePath)) {
+      console.log('[PDF] Found Chromium at:', chromePath);
+      return chromePath;
+    }
+  } catch (e) {
+    console.log('[PDF] Chromium not found via which command');
+  }
+  const nixPaths = [
+    '/nix/var/nix/profiles/default/bin/chromium',
+    '/run/current-system/sw/bin/chromium',
+  ];
+  for (const p of nixPaths) {
+    if (fs.existsSync(p)) {
+      console.log('[PDF] Found Chromium at:', p);
+      return p;
+    }
+  }
+  return undefined;
+}
 
 interface InterventionData {
   id: string;
@@ -177,9 +205,22 @@ export class PDFService {
 
     const html = template(data);
 
+    const chromiumPath = findChromiumPath();
+    console.log('[PDF] Launching browser with path:', chromiumPath || 'default');
+    
     const browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      executablePath: chromiumPath,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+      ],
     });
 
     try {

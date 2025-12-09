@@ -1,11 +1,15 @@
 [phases.setup]
-nixPkgs = ["nodejs_20", "npm"]
+nixPkgs = ["nodejs_20", "npm", "chromium", "nss", "freetype", "harfbuzz", "ca-certificates", "fontconfig", "liberation_ttf"]
 
 [phases.install]
 cmds = ["npm ci"]
 
 [phases.build]
 cmds = ["npm run build"]
+
+[variables]
+PUPPETEER_SKIP_CHROMIUM_DOWNLOAD = "true"
+PUPPETEER_EXECUTABLE_PATH = "/nix/store/*/bin/chromium"
 
 [start]
 cmd = "npm start"
