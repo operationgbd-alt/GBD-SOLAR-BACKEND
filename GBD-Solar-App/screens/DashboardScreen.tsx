@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Pressable } from "react-native";
+import { StyleSheet, View, Pressable, RefreshControl } from "react-native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation, CommonActions } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -34,7 +34,7 @@ export default function DashboardScreen() {
   const navigation = useNavigation<DashboardNavProp>();
   const { theme } = useTheme();
   const { user } = useAuth();
-  const { interventions, appointments, getGlobalStats, unassignedInterventions, users } = useApp();
+  const { interventions, appointments, getGlobalStats, unassignedInterventions, users, isRefreshing, refreshFromServer } = useApp();
   const insets = useSafeAreaInsets();
 
   const userRole = user?.role?.toUpperCase();
@@ -82,7 +82,16 @@ export default function DashboardScreen() {
   };
 
   return (
-    <ScreenScrollView>
+    <ScreenScrollView
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={refreshFromServer}
+          tintColor={theme.primary}
+          colors={[theme.primary]}
+        />
+      }
+    >
       <View style={[styles.welcomeCard, { backgroundColor: theme.backgroundDefault }]}>
         <View style={styles.welcomeHeader}>
           <View style={[styles.avatar, { backgroundColor: isMaster ? theme.danger : theme.primary }]}>
