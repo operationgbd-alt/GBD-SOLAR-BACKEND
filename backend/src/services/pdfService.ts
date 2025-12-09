@@ -17,22 +17,29 @@ const TEMPLATE_PATH = path.join(__dirname, '../templates/intervention-report.htm
 const LOGO_PATH = path.join(__dirname, '../../assets/logo-gbd.png');
 
 function findChromiumPath(): string | undefined {
-  if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-    return process.env.PUPPETEER_EXECUTABLE_PATH;
+  const envPath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  if (envPath && fs.existsSync(envPath)) {
+    console.log('[PDF] Using PUPPETEER_EXECUTABLE_PATH:', envPath);
+    return envPath;
   }
+  
   try {
-    const result = execSync('which chromium || which chromium-browser || which google-chrome', { encoding: 'utf-8' });
+    const result = execSync('which chromium || which chromium-browser || which google-chrome 2>/dev/null', { encoding: 'utf-8' });
     const chromePath = result.trim().split('\n')[0];
     if (chromePath && fs.existsSync(chromePath)) {
-      console.log('[PDF] Found Chromium at:', chromePath);
+      console.log('[PDF] Found Chromium via which:', chromePath);
       return chromePath;
     }
   } catch (e) {
     console.log('[PDF] Chromium not found via which command');
   }
+  
   const nixPaths = [
     '/nix/var/nix/profiles/default/bin/chromium',
     '/run/current-system/sw/bin/chromium',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/google-chrome',
   ];
   for (const p of nixPaths) {
     if (fs.existsSync(p)) {
@@ -40,6 +47,8 @@ function findChromiumPath(): string | undefined {
       return p;
     }
   }
+  
+  console.log('[PDF] No Chromium found, using Puppeteer default');
   return undefined;
 }
 
