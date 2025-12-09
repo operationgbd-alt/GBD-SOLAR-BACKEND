@@ -115,7 +115,7 @@ export default function AppointmentFormScreen({ navigation, route }: Props) {
           id: appointmentId,
           ...appointmentData,
         };
-        await scheduleAppointmentNotification(appointment);
+        await scheduleAppointmentNotification(appointment, notifyBefore);
       } else {
         Alert.alert(
           "Notifiche disabilitate",

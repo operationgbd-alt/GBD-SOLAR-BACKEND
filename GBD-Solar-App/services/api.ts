@@ -237,8 +237,11 @@ export const api = {
   },
 
   // Reports
-  generateReport: async (interventionId: string) => {
-    return apiRequest<{ success: boolean; data: { pdf: string } }>(`/reports/intervention/${interventionId}`);
+  generateReport: async (interventionId: string, format?: string, user?: any, interventionData?: any) => {
+    return apiRequest<{ success: boolean; data: string; filename?: string; error?: string }>(`/reports/intervention/${interventionId}`, {
+      method: 'POST',
+      body: JSON.stringify({ format: format || 'base64', user, interventionData }),
+    });
   },
 
   sendReport: async (interventionId: string) => {
@@ -261,10 +264,10 @@ export const api = {
   },
 
   // Push Tokens
-  registerPushToken: async (token: string) => {
-    return apiRequest<{ success: boolean }>('/push-tokens/register', {
+  registerPushToken: async (token: string, platform?: string) => {
+    return apiRequest<{ success: boolean; error?: string }>('/push-tokens/register', {
       method: 'POST',
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({ token, platform }),
     });
   },
 
@@ -277,5 +280,20 @@ export const api = {
 
   getTechniciansLocations: async () => {
     return apiRequest<{ success: boolean; data: any[] }>('/users/technicians/locations');
+  },
+
+  getInterventionPhotos: async (interventionId: string) => {
+    return apiRequest<{ success: boolean; data: any[] }>(`/photos/intervention/${interventionId}`);
+  },
+
+  getPhoto: async (photoId: string) => {
+    return apiRequest<{ success: boolean; data: { data: string } }>(`/photos/${photoId}`);
+  },
+
+  notifyReportSent: async (interventionId: string, interventionNumber: string, clientName: string) => {
+    return apiRequest<{ success: boolean }>('/push-tokens/notify-report', {
+      method: 'POST',
+      body: JSON.stringify({ interventionId, interventionNumber, clientName }),
+    });
   },
 };

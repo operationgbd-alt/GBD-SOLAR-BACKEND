@@ -1,1 +1,4 @@
 .expo/
+
+# Expo local state
+.expo/

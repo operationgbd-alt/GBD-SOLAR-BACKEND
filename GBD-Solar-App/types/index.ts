@@ -83,7 +83,7 @@ export type AppointmentType = 'intervento' | 'sopralluogo' | 'installazione' | '
 export interface Appointment {
   id: string;
   type: AppointmentType;
-  interventionId: string;
+  interventionId?: string;
   clientName: string;
   address: string;
   date: number;
