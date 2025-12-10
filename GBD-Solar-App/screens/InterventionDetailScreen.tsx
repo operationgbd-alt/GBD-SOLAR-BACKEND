@@ -16,11 +16,14 @@ import { Feather } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../store/AuthContext';
 import { useApp } from '../store/AppContext';
 import { api } from '../services/api';
 import { Colors, Spacing, Typography } from '../constants/theme';
 import { useTheme } from '../hooks/useTheme';
+
+const TOKEN_KEY = 'solartech_auth_token';
 
 interface RouteParams {
   interventionId: string;
@@ -145,7 +148,13 @@ export default function InterventionDetailScreen() {
     try {
       setGeneratingPdf(true);
       
-      const token = api.getToken();
+      let token = api.getToken();
+      if (!token) {
+        token = await AsyncStorage.getItem(TOKEN_KEY);
+        if (token) {
+          api.setToken(token);
+        }
+      }
       if (!token) {
         Alert.alert('Errore', 'Sessione scaduta. Effettua nuovamente il login.');
         return;
