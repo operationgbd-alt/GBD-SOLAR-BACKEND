@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 
-// URL del backend - usa la configurazione Expo o fallback
-const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl || 'https://gbd-solar-backend-production.up.railway.app/api';
+// URL del backend - forza sempre Railway in produzione
+const API_BASE_URL = 'https://gbd-solar-backend-production.up.railway.app/api';
 
 // Token e callback memorizzati
 let authToken: string | null = null;
