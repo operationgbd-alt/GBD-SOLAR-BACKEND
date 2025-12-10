@@ -16,10 +16,14 @@ const Stack = createNativeStackNavigator<InterventionsStackParamList>();
 
 export default function InterventionsStackNavigator() {
   const { theme, isDark } = useTheme();
-  const commonOptions = getCommonScreenOptions({ theme, isDark });
 
   return (
-    <Stack.Navigator screenOptions={commonOptions}>
+    <Stack.Navigator 
+      screenOptions={{
+        ...getCommonScreenOptions({ theme, isDark }),
+        headerBackVisible: false,
+      }}
+    >
       <Stack.Screen
         name="InterventionsList"
         component={InterventionsListScreen}

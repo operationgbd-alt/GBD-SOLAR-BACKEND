@@ -91,7 +91,6 @@ export default function DashboardScreen() {
           colors={[theme.primary]}
         />
       }
-      contentContainerStyle={{ paddingTop: insets.top + Spacing.md }}
     >
       <View style={[styles.welcomeCard, { backgroundColor: theme.backgroundDefault }]}>
         <View style={styles.welcomeHeader}>

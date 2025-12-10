@@ -15,10 +15,14 @@ const Stack = createNativeStackNavigator<CompletedStackParamList>();
 
 export default function CompletedStackNavigator() {
   const { theme, isDark } = useTheme();
-  const commonOptions = getCommonScreenOptions({ theme, isDark });
 
   return (
-    <Stack.Navigator screenOptions={commonOptions}>
+    <Stack.Navigator 
+      screenOptions={{
+        ...getCommonScreenOptions({ theme, isDark }),
+        headerBackVisible: false,
+      }}
+    >
       <Stack.Screen
         name="CompletedList"
         component={CompletedInterventionsScreen}

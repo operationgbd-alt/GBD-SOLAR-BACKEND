@@ -16,8 +16,28 @@ export function BackButton({ fallbackRoute, color }: BackButtonProps) {
   const handleBack = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
-    } else if (fallbackRoute) {
-      navigation.navigate(fallbackRoute);
+      return;
+    }
+    
+    if (fallbackRoute) {
+      const isTabRoute = fallbackRoute.endsWith('Tab');
+      
+      if (isTabRoute) {
+        const parentNav = navigation.getParent();
+        if (parentNav) {
+          parentNav.navigate(fallbackRoute);
+          return;
+        }
+      }
+      
+      try {
+        navigation.navigate(fallbackRoute);
+      } catch {
+        const parentNav = navigation.getParent();
+        if (parentNav) {
+          parentNav.navigate(fallbackRoute);
+        }
+      }
     }
   };
 

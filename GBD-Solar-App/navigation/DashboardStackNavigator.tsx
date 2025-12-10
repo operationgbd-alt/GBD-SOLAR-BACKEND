@@ -34,6 +34,7 @@ export default function DashboardStackNavigator() {
     <Stack.Navigator
       screenOptions={{
         ...getCommonScreenOptions({ theme, isDark }),
+        headerBackVisible: false,
       }}
     >
       <Stack.Screen

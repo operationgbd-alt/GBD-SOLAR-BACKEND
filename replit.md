@@ -140,6 +140,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**December 10, 2025 - Critical UI & Navigation Fixes**:
+- **Safe Area Fix**: Modified `useScreenInsets.ts` to include `insets.top + Spacing.md` for proper top padding on all screens
+- **BackButton Improvements**: Enhanced shared `BackButton.tsx` to use `navigation.getParent()?.navigate()` for tab routes (routes ending with "Tab")
+- **Duplicate Arrows Fix**: Added `headerBackVisible: false` to all stack navigators to prevent double back arrows
+- **ProfileStackNavigator Cleanup**: Removed local `ProfileBackButton` and `ContextAwareBackButton` components, now uses shared `BackButton` with `theme.primary` (blue) color
+- **PDF Token Fallback**: `InterventionDetailScreen.handleGeneratePdf()` now reads token from AsyncStorage if `api.getToken()` returns null (fixes PDF generation after app restart)
+- **Consistent Navigation**: All navigators (Dashboard, Interventions, Completed, Profile) now use identical back button configuration
+
 **December 2025 - Backend API Endpoint Fixes (Critical)**:
 - Added missing `/api/photos` routes: GET /intervention/:id, POST /, GET /:id, DELETE /:id
 - Added missing `/api/reports` route: POST /intervention/:id for PDF generation

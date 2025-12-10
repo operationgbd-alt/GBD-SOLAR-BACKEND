@@ -6,8 +6,9 @@ export function useScreenInsets() {
   const insets = useSafeAreaInsets();
 
   return {
-    paddingTop: Spacing.md,
+    paddingTop: insets.top + Spacing.md,
     paddingBottom: Math.max(insets.bottom, Spacing.md) + Spacing.lg,
     scrollInsetBottom: insets.bottom + 16,
+    insets,
   };
 }
