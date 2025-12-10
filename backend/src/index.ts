@@ -9,6 +9,9 @@ import interventionRoutes from './routes/interventions';
 import appointmentRoutes from './routes/appointments';
 import companyRoutes from './routes/companies';
 import userRoutes from './routes/users';
+import photoRoutes from './routes/photos';
+import reportRoutes from './routes/reports';
+import pushTokenRoutes from './routes/push-tokens';
 
 dotenv.config();
 
@@ -16,7 +19,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 async function initDatabase() {
   console.log('Inizializzazione database...');
@@ -128,6 +132,9 @@ app.use('/api/interventions', interventionRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/photos', photoRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/push-tokens', pushTokenRoutes);
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err.message);

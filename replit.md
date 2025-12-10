@@ -44,10 +44,13 @@ Preferred communication style: Simple, everyday language.
 
 **API Structure**:
 - `/api/auth` - Login and registration
-- `/api/interventions` - CRUD operations for work orders
+- `/api/interventions` - CRUD operations for work orders + sub-routes for status/notes/gps/appointment/assign
 - `/api/appointments` - Calendar and scheduling
 - `/api/companies` - Installation company management
-- `/api/users` - User and technician management
+- `/api/users` - User and technician management + technicians/locations endpoint
+- `/api/photos` - Photo upload and management for interventions
+- `/api/reports` - PDF report generation
+- `/api/push-tokens` - Push notification token management
 
 **Security Approach**:
 - Password hashing with bcryptjs (10 salt rounds)
@@ -136,6 +139,18 @@ Preferred communication style: Simple, everyday language.
 - SSL/TLS for database connections in production
 
 ## Recent Changes
+
+**December 2025 - Backend API Endpoint Fixes (Critical)**:
+- Added missing `/api/photos` routes: GET /intervention/:id, POST /, GET /:id, DELETE /:id
+- Added missing `/api/reports` route: POST /intervention/:id for PDF generation
+- Added missing `/api/push-tokens` routes: register, unregister, notify-report
+- Added intervention sub-routes: PUT /:id/status, PUT /:id/notes, PUT /:id/gps, POST /:id/appointment, PUT /:id/assign
+- Standardized all API responses to use `{success: true/false, data: ...}` envelope
+- Fixed PUT /interventions/:id to include companyId field and return camelCase response
+- Added POST /users endpoint for technician creation by Ditta users
+- Added GET /users/technicians/locations for map tracking
+- Increased Express body limit to 50mb for base64 photo uploads
+- Fixed /auth/register to return userId in response
 
 **December 2025 - Navigation & Layout Fix**:
 - Fixed back button navigation in all stack navigators (ProfileStackNavigator, InterventionsStackNavigator, DashboardStackNavigator)

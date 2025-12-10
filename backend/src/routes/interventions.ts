@@ -153,7 +153,7 @@ router.put('/:id', authenticateToken, async (req: AuthRequest, res) => {
     const { id } = req.params;
     const { 
       clientName, address, phone, email, type, priority, 
-      description, technicianId, status, scheduledDate, notes 
+      description, technicianId, companyId, status, scheduledDate, notes 
     } = req.body;
 
     const result = await pool.query(
@@ -169,19 +169,44 @@ router.put('/:id', authenticateToken, async (req: AuthRequest, res) => {
        status = COALESCE($9, status),
        scheduled_date = COALESCE($10, scheduled_date),
        notes = COALESCE($11, notes),
+       company_id = COALESCE($12, company_id),
        updated_at = NOW()
-       WHERE id = $12 RETURNING *`,
+       WHERE id = $13 RETURNING *`,
       [clientName, address, phone, email, type, priority, 
-       description, technicianId, status, scheduledDate, notes, id]
+       description, technicianId, status, scheduledDate, notes, companyId, id]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Intervento non trovato' });
+      return res.status(404).json({ success: false, error: 'Intervento non trovato' });
     }
 
-    res.json(result.rows[0]);
+    const row = result.rows[0];
+    res.json({
+      success: true,
+      data: {
+        id: String(row.id),
+        number: `INT-${new Date(row.created_at).getFullYear()}-${String(row.id).padStart(3, '0')}`,
+        clientName: row.client_name,
+        clientAddress: row.address,
+        clientPhone: row.phone,
+        clientEmail: row.email,
+        category: row.type,
+        priority: row.priority,
+        description: row.description,
+        status: row.status,
+        technicianId: row.technician_id ? String(row.technician_id) : null,
+        companyId: row.company_id ? String(row.company_id) : null,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        scheduledDate: row.scheduled_date,
+        notes: row.notes,
+        latitude: row.latitude,
+        longitude: row.longitude,
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Errore aggiornamento intervento' });
+    console.error('Errore aggiornamento intervento:', error);
+    res.status(500).json({ success: false, error: 'Errore aggiornamento intervento' });
   }
 });
 
@@ -194,9 +219,211 @@ router.delete('/:id', authenticateToken, requireRole('master', 'ditta'), async (
       return res.status(404).json({ error: 'Intervento non trovato' });
     }
 
-    res.json({ message: 'Intervento eliminato' });
+    res.json({ success: true, message: 'Intervento eliminato' });
   } catch (error) {
-    res.status(500).json({ error: 'Errore eliminazione intervento' });
+    res.status(500).json({ success: false, error: 'Errore eliminazione intervento' });
+  }
+});
+
+router.put('/:id/status', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { status, notes } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ success: false, error: 'Status richiesto' });
+    }
+
+    const updateFields = ['status = $1', 'updated_at = NOW()'];
+    const params: any[] = [status];
+    let paramIndex = 2;
+
+    if (notes !== undefined) {
+      updateFields.push(`notes = $${paramIndex}`);
+      params.push(notes);
+      paramIndex++;
+    }
+
+    if (status === 'completato') {
+      updateFields.push(`completed_date = NOW()`);
+    }
+
+    params.push(id);
+    const query = `UPDATE interventions SET ${updateFields.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+
+    const result = await pool.query(query, params);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Intervento non trovato' });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      success: true,
+      data: {
+        id: String(row.id),
+        status: row.status,
+        notes: row.notes,
+        updatedAt: row.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('Errore aggiornamento status:', error);
+    res.status(500).json({ success: false, error: 'Errore aggiornamento status' });
+  }
+});
+
+router.put('/:id/notes', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { notes } = req.body;
+
+    const result = await pool.query(
+      'UPDATE interventions SET notes = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [notes, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Intervento non trovato' });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      success: true,
+      data: {
+        id: String(row.id),
+        notes: row.notes,
+        updatedAt: row.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('Errore aggiornamento note:', error);
+    res.status(500).json({ success: false, error: 'Errore aggiornamento note' });
+  }
+});
+
+router.put('/:id/gps', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { latitude, longitude } = req.body;
+
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({ success: false, error: 'Coordinate GPS richieste' });
+    }
+
+    const result = await pool.query(
+      'UPDATE interventions SET latitude = $1, longitude = $2, updated_at = NOW() WHERE id = $3 RETURNING *',
+      [latitude, longitude, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Intervento non trovato' });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      success: true,
+      data: {
+        id: String(row.id),
+        latitude: row.latitude,
+        longitude: row.longitude,
+        updatedAt: row.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('Errore aggiornamento GPS:', error);
+    res.status(500).json({ success: false, error: 'Errore aggiornamento GPS' });
+  }
+});
+
+router.post('/:id/appointment', authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { date, notes } = req.body;
+
+    if (!date) {
+      return res.status(400).json({ success: false, error: 'Data appuntamento richiesta' });
+    }
+
+    const result = await pool.query(
+      `UPDATE interventions 
+       SET scheduled_date = $1, 
+           status = 'appuntamento_fissato',
+           notes = COALESCE($2, notes),
+           updated_at = NOW() 
+       WHERE id = $3 RETURNING *`,
+      [date, notes, id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Intervento non trovato' });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      success: true,
+      data: {
+        id: String(row.id),
+        scheduledDate: row.scheduled_date,
+        status: row.status,
+        notes: row.notes,
+        updatedAt: row.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('Errore impostazione appuntamento:', error);
+    res.status(500).json({ success: false, error: 'Errore impostazione appuntamento' });
+  }
+});
+
+router.put('/:id/assign', authenticateToken, requireRole('master'), async (req: AuthRequest, res) => {
+  try {
+    const { id } = req.params;
+    const { companyId, technicianId } = req.body;
+
+    const updateFields = ['updated_at = NOW()'];
+    const params: any[] = [];
+    let paramIndex = 1;
+
+    if (companyId !== undefined) {
+      updateFields.push(`company_id = $${paramIndex}`);
+      params.push(companyId || null);
+      paramIndex++;
+    }
+
+    if (technicianId !== undefined) {
+      updateFields.push(`technician_id = $${paramIndex}`);
+      params.push(technicianId || null);
+      paramIndex++;
+    }
+
+    if (companyId || technicianId) {
+      updateFields.push(`status = 'assegnato'`);
+    }
+
+    params.push(id);
+    const query = `UPDATE interventions SET ${updateFields.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+
+    const result = await pool.query(query, params);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Intervento non trovato' });
+    }
+
+    const row = result.rows[0];
+    res.json({
+      success: true,
+      data: {
+        id: String(row.id),
+        companyId: row.company_id ? String(row.company_id) : null,
+        technicianId: row.technician_id ? String(row.technician_id) : null,
+        status: row.status,
+        updatedAt: row.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('Errore assegnazione intervento:', error);
+    res.status(500).json({ success: false, error: 'Errore assegnazione intervento' });
   }
 });
 

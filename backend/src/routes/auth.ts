@@ -38,10 +38,15 @@ router.post('/register', async (req, res) => {
       { expiresIn: '7d' }
     );
 
-    res.status(201).json({ success: true, user, token });
+    res.status(201).json({ 
+      success: true, 
+      userId: String(user.id),
+      user, 
+      token 
+    });
   } catch (error) {
     console.error('Errore registrazione:', error);
-    res.status(500).json({ error: 'Errore durante la registrazione' });
+    res.status(500).json({ success: false, error: 'Errore durante la registrazione' });
   }
 });
 
