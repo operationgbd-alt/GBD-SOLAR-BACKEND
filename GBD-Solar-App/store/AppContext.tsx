@@ -20,7 +20,7 @@ interface AppContextType {
   addIntervention: (intervention: Omit<Intervention, 'id' | 'number' | 'createdAt' | 'updatedAt'>) => Promise<boolean>;
   updateIntervention: (id: string, updates: Partial<Intervention>) => void;
   deleteIntervention: (id: string) => void;
-  bulkAssignToCompany: (interventionIds: string[], companyId: string, companyName: string) => void;
+  bulkAssignToCompany: (interventionIds: string[], companyId: string, companyName: string) => Promise<void>;
   addAppointment: (appointment: Appointment) => void;
   updateAppointment: (id: string, appointment: Partial<Appointment>) => void;
   deleteAppointment: (id: string) => void;
@@ -218,7 +218,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
           interventionCounter = maxNum;
         }
         
-        setAppointmentsData([]);
+        const scheduledAppointments: Appointment[] = response.data
+          .filter((serverInt: any) => serverInt.scheduledDate)
+          .map((serverInt: any) => ({
+            id: `apt-${serverInt.id}`,
+            clientName: serverInt.clientName || 'Cliente',
+            address: serverInt.clientAddress || '',
+            date: new Date(serverInt.scheduledDate).getTime(),
+            type: (serverInt.category || serverInt.type || 'intervento') as Appointment['type'],
+            interventionId: String(serverInt.id),
+            notes: serverInt.notes || '',
+            notifyBefore: null,
+          }));
+        console.log('[REFRESH] Created', scheduledAppointments.length, 'appointments from scheduled interventions');
+        setAppointmentsData(scheduledAppointments);
       } else {
         console.log('[REFRESH] API failed, keeping local data');
       }
@@ -409,8 +422,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setInterventionsData(prev => prev.filter(i => i.id !== id));
   }, []);
 
-  const bulkAssignToCompany = useCallback((interventionIds: string[], companyId: string, companyName: string) => {
+  const bulkAssignToCompany = useCallback(async (interventionIds: string[], companyId: string, companyName: string) => {
     const now = Date.now();
+    
     setInterventionsData(prev =>
       prev.map(i =>
         interventionIds.includes(i.id)
@@ -426,7 +440,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
           : i
       )
     );
-  }, []);
+
+    if (hasValidToken) {
+      try {
+        await Promise.all(
+          interventionIds.map(id =>
+            api.patch(`/interventions/${id}/assign`, { companyId })
+          )
+        );
+        console.log('[ASSIGN] Successfully assigned', interventionIds.length, 'interventions to company', companyId);
+      } catch (error) {
+        console.error('[ASSIGN] Error assigning to server:', error);
+      }
+    }
+  }, [hasValidToken]);
 
   const unassignedInterventions = useMemo(() => {
     return interventionsData.filter(i => !i.companyId);

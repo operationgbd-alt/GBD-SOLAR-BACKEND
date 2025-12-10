@@ -145,7 +145,7 @@ export default function InterventionDetailScreen() {
     try {
       setGeneratingPdf(true);
       
-      const pdfUrl = `${api.getBaseUrl()}/interventions/${interventionId}/pdf`;
+      const pdfUrl = `${api.getBaseUrl()}/interventions/${interventionId}/download-report`;
       const filename = `Intervento_${intervention?.number || interventionId}.pdf`;
       
       if (Platform.OS === 'web') {
