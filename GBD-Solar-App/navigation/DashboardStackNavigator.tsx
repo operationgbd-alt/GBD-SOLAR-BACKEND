@@ -1,8 +1,5 @@
 import React from "react";
-import { Pressable } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
-import { Feather } from "@expo/vector-icons";
 import DashboardScreen from "@/screens/DashboardScreen";
 import CalendarScreen from "@/screens/CalendarScreen";
 import AppointmentFormScreen from "@/screens/AppointmentFormScreen";
@@ -12,29 +9,10 @@ import { BulkAssignScreen } from "@/screens/BulkAssignScreen";
 import { TechnicianMapScreen } from "@/screens/TechnicianMapScreen";
 import InterventionDetailScreen from "@/screens/InterventionDetailScreen";
 import { HeaderTitle } from "@/components/HeaderTitle";
+import { BackButton } from "@/components/BackButton";
 import { useTheme } from "@/hooks/useTheme";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
 import { Appointment } from "@/types";
-import { Spacing } from "@/constants/theme";
-
-function BackButton() {
-  const { theme } = useTheme();
-  const navigation = useNavigation<any>();
-
-  const handleBack = () => {
-    if (navigation.canGoBack()) {
-      navigation.goBack();
-    } else {
-      navigation.navigate('Dashboard');
-    }
-  };
-
-  return (
-    <Pressable onPress={handleBack} style={{ padding: Spacing.xs, minWidth: 44, minHeight: 44, justifyContent: 'center' }}>
-      <Feather name="chevron-left" size={28} color={theme.text} />
-    </Pressable>
-  );
-}
 
 export type DashboardStackParamList = {
   Dashboard: undefined;
@@ -70,7 +48,7 @@ export default function DashboardStackNavigator() {
         component={CalendarScreen}
         options={{ 
           headerTitle: "Calendario",
-          headerLeft: () => <BackButton />,
+          headerLeft: () => <BackButton fallbackRoute="Dashboard" />,
         }}
       />
       <Stack.Screen
@@ -79,7 +57,7 @@ export default function DashboardStackNavigator() {
         options={({ route }) => ({
           headerTitle: route.params?.appointment ? "Modifica Appuntamento" : "Nuovo Appuntamento",
           presentation: "modal",
-          headerLeft: () => <BackButton />,
+          headerLeft: () => <BackButton fallbackRoute="Calendar" />,
         })}
       />
       <Stack.Screen
@@ -87,7 +65,7 @@ export default function DashboardStackNavigator() {
         component={CompanyInterventionsScreen}
         options={({ route }) => ({
           headerTitle: route.params.companyName,
-          headerLeft: () => <BackButton />,
+          headerLeft: () => <BackButton fallbackRoute="Dashboard" />,
         })}
       />
       <Stack.Screen
@@ -96,7 +74,7 @@ export default function DashboardStackNavigator() {
         options={{
           headerTitle: "Nuovo Intervento",
           presentation: "modal",
-          headerLeft: () => <BackButton />,
+          headerLeft: () => <BackButton fallbackRoute="Dashboard" />,
         }}
       />
       <Stack.Screen
@@ -105,7 +83,7 @@ export default function DashboardStackNavigator() {
         options={{
           headerTitle: "Assegna Interventi",
           presentation: "modal",
-          headerLeft: () => <BackButton />,
+          headerLeft: () => <BackButton fallbackRoute="Dashboard" />,
         }}
       />
       <Stack.Screen
@@ -113,7 +91,7 @@ export default function DashboardStackNavigator() {
         component={TechnicianMapScreen}
         options={{
           headerTitle: "Mappa Tecnici",
-          headerLeft: () => <BackButton />,
+          headerLeft: () => <BackButton fallbackRoute="Dashboard" />,
         }}
       />
       <Stack.Screen
@@ -121,7 +99,7 @@ export default function DashboardStackNavigator() {
         component={InterventionDetailScreen}
         options={{
           headerTitle: "Dettaglio Intervento",
-          headerLeft: () => <BackButton />,
+          headerLeft: () => <BackButton fallbackRoute="Dashboard" />,
         }}
       />
     </Stack.Navigator>

@@ -145,17 +145,26 @@ export default function InterventionDetailScreen() {
     try {
       setGeneratingPdf(true);
       
+      const token = api.getToken();
+      if (!token) {
+        Alert.alert('Errore', 'Sessione scaduta. Effettua nuovamente il login.');
+        return;
+      }
+      
       const pdfUrl = `${api.getBaseUrl()}/interventions/${interventionId}/download-report`;
       const filename = `Intervento_${intervention?.number || interventionId}.pdf`;
       
+      console.log('[PDF] Downloading from:', pdfUrl);
+      
       if (Platform.OS === 'web') {
-        const token = await api.getToken();
         const response = await fetch(pdfUrl, {
           headers: { Authorization: `Bearer ${token}` }
         });
         
         if (!response.ok) {
-          throw new Error('Errore download PDF');
+          const errorText = await response.text();
+          console.error('[PDF] Server error:', errorText);
+          throw new Error(`Errore server: ${response.status}`);
         }
         
         const blob = await response.blob();
@@ -170,7 +179,6 @@ export default function InterventionDetailScreen() {
         
         Alert.alert('Successo', 'PDF scaricato con successo!');
       } else {
-        const token = await api.getToken();
         const downloadResult = await (FileSystem as any).downloadAsync(
           pdfUrl,
           `${(FileSystem as any).documentDirectory}${filename}`,
@@ -178,6 +186,8 @@ export default function InterventionDetailScreen() {
             headers: { Authorization: `Bearer ${token}` }
           }
         );
+
+        console.log('[PDF] Download result:', downloadResult.status);
 
         if (downloadResult.status === 200) {
           if (await Sharing.isAvailableAsync()) {
@@ -188,12 +198,16 @@ export default function InterventionDetailScreen() {
           } else {
             Alert.alert('Successo', `PDF salvato: ${filename}`);
           }
+        } else if (downloadResult.status === 401) {
+          Alert.alert('Errore', 'Sessione scaduta. Effettua nuovamente il login.');
+        } else if (downloadResult.status === 404) {
+          Alert.alert('Errore', 'Endpoint non trovato sul server.');
         } else {
-          Alert.alert('Errore', 'Impossibile scaricare il PDF');
+          Alert.alert('Errore', `Impossibile scaricare il PDF (${downloadResult.status})`);
         }
       }
     } catch (error: any) {
-      console.error('Error generating PDF:', error);
+      console.error('[PDF] Error:', error);
       Alert.alert('Errore', error.message || 'Errore durante la generazione del PDF');
     } finally {
       setGeneratingPdf(false);
